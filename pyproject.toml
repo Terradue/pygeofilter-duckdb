@@ -12,6 +12,7 @@ license = "MIT"
 keywords = []
 authors = [
   { name = "Fabrice Brito", email = "fabrice.brito@terradue.com" },
+  { name = "Simone Tripodi", email = "simone.tripodi@terradue.com"}
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -35,9 +36,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/Fabrice Brito/pygeofilter-duckdb#readme"
-Issues = "https://github.com/Fabrice Brito/pygeofilter-duckdb/issues"
-Source = "https://github.com/Fabrice Brito/pygeofilter-duckdb"
+Documentation = "https://github.com/Terradue/pygeofilter-duckdb#readme"
+Issues = "https://github.com/Terradue/pygeofilter-duckdb/issues"
+Source = "https://github.com/Terradue/pygeofilter-duckdb"
 
 [tool.hatch.version]
 path = "src/pygeofilter_duckdb/__about__.py"
