@@ -4,7 +4,7 @@ This repo is an evolution of [https://github.com/DLR-terrabyte/pygeofilter-duckd
 
 We have changed the orginal implementation to:
 - make it a standalone library
-- updated it to support duckdb newer releases (no support for 1.2.0 yet) 
+- use DuckDB below 1.2 on Python 3.10–3.13 and DuckDB 1.4.2–1.4.x on Python 3.14
 - added more examples to cover the process STAC Items -> geoparquet -> Duckdb
 - use hatch
 

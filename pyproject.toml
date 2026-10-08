@@ -1,15 +1,35 @@
+# Copyright 2025 Terradue
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.32.4"]
 build-backend = "hatchling.build"
 
 [project]
 name = "pygeofilter-duckdb"
 dynamic = ["version"]
-description = ''
+description = "pygeofilter extension to support SQL queries in DuckDB based on Geoparquet files"
 readme = "README.md"
-requires-python = ">=3.8"
-license = "MIT"
-keywords = []
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+keywords = [
+  "pygeofilter",
+  "cql2-text",
+  "cql2-json",
+  "duckdb"
+]
 authors = [
   { name = "Fabrice Brito", email = "fabrice.brito@terradue.com" },
   { name = "Simone Tripodi", email = "simone.tripodi@terradue.com"}
@@ -17,38 +37,58 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "pygeofilter>= 0.2.4",
-  "duckdb>=0.2.0",
+  "pygeofilter==0.4.0",
+  "duckdb>=0.2.0,<1.2.0; python_version < '3.14'",
+  "duckdb>=1.4.2,<1.5.0; python_version >= '3.14'",
   "shapely",
-  "duckdb<1.2.0",
   "pystac_client",
   "stac-geoparquet",
-  "pytest",
 ]
 
+# ---------------------------------------------------------------------------
+# Project Refs
+# ---------------------------------------------------------------------------
+
 [project.urls]
-Documentation = "https://github.com/Terradue/pygeofilter-duckdb#readme"
+Documentation = "https://terradue.github.io/pygeofilter-duckdb/"
 Issues = "https://github.com/Terradue/pygeofilter-duckdb/issues"
 Source = "https://github.com/Terradue/pygeofilter-duckdb"
+Changelog = "https://github.com/Terradue/pygeofilter-duckdb/blob/main/CHANGELOG.md"
+
+# ---------------------------------------------------------------------------
+# Versioning and packaging
+# ---------------------------------------------------------------------------
 
 [tool.hatch.version]
 path = "src/pygeofilter_duckdb/__about__.py"
 
-[tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.0.0",
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/docs",
+  "/README.md",
+  "/CHANGELOG.md",
+  "/LICENSE",
+  "/NOTICE",
+  "/pyproject.toml",
 ]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/pygeofilter_duckdb tests}"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pygeofilter_duckdb"]
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
 
 [tool.coverage.run]
 source_pkgs = ["pygeofilter_duckdb", "tests"]
@@ -59,12 +99,225 @@ omit = [
 ]
 
 [tool.coverage.paths]
-pygeofilter_duckdb = ["src/pygeofilter_duckdb", "*/pygeofilter-duckdb/src/pygeofilter_duckdb"]
-tests = ["tests", "*/pygeofilter-duckdb/tests"]
+pygeofilter_duckdb_api = [
+  "src/pygeofilter_duckdb",
+  "*/pygeofilter-odata-cdse/src/pygeofilter_duckdb"
+]
 
 [tool.coverage.report]
+show_missing = true
+skip_covered = false
+
 exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+]
+
+# ---------------------------------------------------------------------------
+# Hatch: test environment
+# ---------------------------------------------------------------------------
+
+[tool.hatch.envs.test]
+skip-install = false
+dependencies = [
+  "pytest>=8.4,<10",
+  "pytest-cov>=6.2,<8",
+]
+
+[tool.hatch.envs.test.scripts]
+test = "pytest {args:tests}"
+testv = "pytest --verbose {args:tests}"
+test-cov = "pytest --cov=pygeofilter_duckdb --cov-report=term-missing --cov-report=xml:coverage.xml {args:tests}"
+test-show-setup = "pytest --setup-show {args:tests}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+]
+
+xfail_strict = true
+
+# ---------------------------------------------------------------------------
+# Hatch: development and quality environment
+# ---------------------------------------------------------------------------
+
+[tool.hatch.envs.dev]
+skip-install = false
+dependencies = [
+  "mypy>=2.3.0",
+  "types-shapely>=2.1",
+  "ruff>=0.16.0",
+  "bandit>=1.9.4",
+  "pytest>=8.4,<10",
+]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# Start with the essential rules
+select = [
+  # Core correctness
+  "F",      # Pyflakes
+  "E",      # pycodestyle errors
+  "W",      # pycodestyle warnings
+
+  # Imports and modernization
+  "I",      # isort
+  "UP",     # pyupgrade
+  "FA",     # future annotations
+  "TC",     # type-checking imports
+
+  # Bugs and correctness
+  "B",      # flake8-bugbear
+  "RET",    # flake8-return
+  "PTH",    # pathlib usage
+  "C4",     # comprehensions
+
+  # Simplification and readability
+  "SIM",    # flake8-simplify
+
+  # Complexity
+  "C90",    # McCabe complexity
+
+  # Pylint-derived checks
+  "PLE",    # Pylint errors
+  "PLW",    # Pylint warnings
+  "PLR",    # Pylint refactor/design checks
+
+  # Performance and Ruff-specific quality checks
+  "PERF",
+  "RUF",
+]
+
+ignore = [
+  # Formatter-controlled rules
+  "E501",   # line length
+  "W191",   # tab indentation
+  "E111",   # indentation
+  "E114",   # indentation
+  "E117",   # over-indented
+
+  # Too opinionated for a general project template.
+  # Enable per repository if useful.
+  # "PLR0904", # too many public methods
+]
+
+[tool.ruff.lint.flake8-type-checking]
+# Pydantic resolves model field annotations at runtime.
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+
+[tool.ruff.lint.mccabe]
+# Flag errors (C901) whenever complexity exceeds 10 (default is 10)
+max-complexity = 7
+
+[tool.ruff.lint.pylint]
+# Keep these deliberately stricter than Pylint defaults.
+max-args = 6
+max-branches = 10
+max-returns = 6
+max-statements = 40
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+
+[tool.mypy]
+
+# Resolve the pygeofilter_duckdb namespace package from the src layout.
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
+explicit_package_bases = true
+
+# Strict typing is the default for new Terradue Python projects.
+strict = true
+
+# Improve diagnostics.
+pretty = true
+show_error_codes = true
+show_error_context = true
+warn_unreachable = true
+
+# Avoid silently accepting untyped third-party APIs.
+ignore_missing_imports = false
+
+# Files checked by default.
+files = [
+  "src/pygeofilter_duckdb",
+  "tests",
+]
+
+# These dependencies have inline annotations but omit the py.typed marker.
+# Analyze those annotations instead of treating their APIs as Any.
+[[tool.mypy.overrides]]
+module = ["pygeofilter.*"]
+follow_untyped_imports = true
+
+[tool.hatch.envs.dev.scripts]
+# ---------------------------------------------------------------------------
+# Developer commands
+#
+# These commands are allowed to modify files.
+# ---------------------------------------------------------------------------
+
+format = "ruff format {args:src tests}"
+
+fix = [
+  "ruff check --fix {args:src tests}",
+  "ruff format {args:src tests}",
+]
+
+# ---------------------------------------------------------------------------
+# Verification commands
+#
+# These commands MUST NOT modify files and are suitable for CI.
+# ---------------------------------------------------------------------------
+
+format-check = "ruff format --check {args:src tests}"
+
+lint = "ruff check {args:src tests}"
+lint-check = "ruff check {args:src tests}"
+design-check = "ruff check --select C90,PLR {args:src tests}"
+
+typecheck = "mypy {args:src tests}"
+
+security = "bandit -r {args:src}"
+
+# Run the complete static quality gate.
+quality = [
+  "ruff format --check {args:src tests}",
+  "ruff check {args:src tests}",
+  "mypy {args:src tests}",
+  "bandit -r {args:src}",
+]
+
+# Complete local/CI validation including tests.
+check = [
+  "ruff format --check {args:src tests}",
+  "ruff check {args:src tests}",
+  "mypy {args:src tests}",
+  "bandit -r {args:src}",
+  "pytest {args:tests}",
+]
+
+# Preserve editable-install test extras and uv's local wheel resolution.
+[project.optional-dependencies]
+test = [
+  "pytest>=8.4,<10",
+  "pytest-cov>=6.2,<8"
 ]

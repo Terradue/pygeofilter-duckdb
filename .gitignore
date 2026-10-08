@@ -4,3 +4,6 @@ __pycache__
 .ipynb_checkpoints
 *.parquet
 *.jsonl
+.task
+uv.lock
+.venv
