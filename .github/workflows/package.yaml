@@ -76,6 +76,7 @@ jobs:
       run: python -m pytest -q
 
   deploy:
+    if: github.event_name == 'release' && github.event.action == 'published'
     needs: compatibility
     runs-on: ubuntu-latest
     environment: release
@@ -97,13 +98,7 @@ jobs:
       run: |
         hatch run test:pytest --collect-only -q
         hatch run test:test
-    - name: Publish package distributions to PyPI (main)
-      if: github.ref == 'refs/heads/main'
+    - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://upload.pypi.org/legacy/
-    - name: Publish package distributions to PyPI (develop)
-      if: github.ref != 'refs/heads/main'
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
