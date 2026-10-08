@@ -94,6 +94,26 @@ and spatial extensions, rather than checking SQL strings alone.
 
 ## Usage
 
+For client-supplied filters, pass explicit, server-controlled property and
+function mappings. For example, `{"cloud_cover": "eo:cloud_cover"}` exposes
+only that property. `IdempotentDict()` in the example below accepts arbitrary
+property names and is intended for datasets whose queryable fields are already
+controlled by the caller.
+
+Mapped property names are quoted as single identifiers, with embedded double
+quotes escaped. Function mappings form an allowlist and must contain simple
+or schema-qualified names such as `lower` or `main.lower`, rather than SQL
+fragments. Quoted function identifiers are not supported. Unknown properties
+and functions raise `KeyError`; invalid mapped function names and invalid LIKE
+settings raise `ValueError` before SQL execution. Applications should translate
+these exceptions into their own client-error responses.
+
+String values, LIKE patterns and escape characters, and array elements receive
+SQL literal escaping. LIKE wildcards still have their pattern meaning: escaping
+SQL quotes does not make `%` or `_` literal pattern characters. Function
+allowlisting controls access to functions; syntactically valid names alone do
+not establish that a function is appropriate for a particular gateway.
+
 ```python
 from pygeofilter.parsers.cql2_json import parse as json_parse
 from pygeofilter_duckdb import to_sql_where

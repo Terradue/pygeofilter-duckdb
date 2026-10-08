@@ -1,19 +1,93 @@
 """Translate parsed OGC filters into SQL expressions for DuckDB."""
 
-from typing import Dict, Optional
 import datetime
-import shapely.geometry
+import re
 
+import shapely.geometry
 from pygeofilter import ast, values
 from pygeofilter.backends.evaluator import handle
 from pygeofilter.backends.sql.evaluate import SQLEvaluator
 
-
 class DuckDBEvaluator(SQLEvaluator):
     """Render filter expressions with DuckDB spatial geometry constructors."""
 
+    @handle(ast.Attribute)
+    def attribute(self, node: ast.Attribute) -> str:
+        """Render a mapped property as a quoted SQL identifier.
+
+        Args:
+            node: Property reference from the parsed filter.
+
+        Returns:
+            Identifier with embedded double quotes escaped.
+
+        Raises:
+            KeyError: If the property is absent from the field mapping.
+        """
+        field = self.attribute_map[node.name].replace('"', '""')
+        return f'"{field}"'
+
+    @handle(ast.Function)
+    def function(self, node: ast.Function, *arguments: str) -> str:
+        """Render a function approved by the caller's function mapping.
+
+        Args:
+            node: Function reference from the parsed filter.
+            arguments: Rendered SQL expressions for its arguments.
+
+        Returns:
+            SQL call using a simple or schema-qualified function name.
+
+        Raises:
+            KeyError: If the function is absent from the function mapping.
+            ValueError: If the mapped name contains SQL syntax beyond a name.
+        """
+        function = self.function_map[node.name]
+        if not re.fullmatch(
+            r"[A-Za-z_][A-Za-z0-9_$]*(?:\.[A-Za-z_][A-Za-z0-9_$]*)*", function
+        ):
+            raise ValueError(
+                "Mapped functions must be simple or schema-qualified names"
+            )
+        return f"{function}({','.join(arguments)})"
+
+    @handle(ast.Like)
+    def like(self, node: ast.Like, lhs: str) -> str:
+        """Render a pattern predicate with escaped SQL string literals.
+
+        Args:
+            node: Pattern predicate with wildcard and escape settings.
+            lhs: Rendered SQL expression to match against the pattern.
+
+        Returns:
+            LIKE or ILIKE predicate, including negation and escape settings.
+
+        Raises:
+            ValueError: If the pattern is not a string or escape settings
+                cannot be represented by DuckDB.
+        """
+        if not isinstance(node.pattern, str):
+            raise ValueError("LIKE patterns must be strings")
+        if len(node.escapechar) > 1:
+            raise ValueError(
+                "LIKE escape characters must contain at most one character"
+            )
+        if len(node.wildcard) != 1 or len(node.singlechar) != 1:
+            raise ValueError("LIKE wildcards must each contain one character")
+        pattern = node.pattern
+        if node.wildcard != "%":
+            pattern = pattern.replace(node.wildcard, "%")
+        if node.singlechar != "_":
+            pattern = pattern.replace(node.singlechar, "_")
+        operator = "ILIKE" if node.nocase and self.use_ilike else "LIKE"
+        negation = "NOT " if node.not_ else ""
+        return (
+            f"{lhs} {negation}{operator} {self.literal(pattern)} "
+            f"ESCAPE {self.literal(node.escapechar)}"
+        )
+
     @handle(values.Geometry)
-    def geometry(self, node: values.Geometry):
+    def geometry(self, node: values.Geometry) -> str:
         """Render a geometry literal as a DuckDB SQL expression.
 
         Args:
@@ -26,7 +100,7 @@ class DuckDBEvaluator(SQLEvaluator):
         return f"ST_GeomFromHEXEWKB('{wkb_hex}')"
 
     @handle(values.Envelope)
-    def envelope(self, node: values.Envelope):
+    def envelope(self, node: values.Envelope) -> str:
         """Render a bounding envelope as a DuckDB SQL geometry expression.
 
         Args:
@@ -39,7 +113,7 @@ class DuckDBEvaluator(SQLEvaluator):
         return f"ST_GeomFromHEXEWKB('{wkb_hex}')"
 
     @handle(*values.LITERALS)
-    def literal(self, node):
+    def literal(self, node: ast.AstType) -> str:
         """Render a filter literal for inclusion in a SQL expression.
 
         Args:
@@ -47,22 +121,24 @@ class DuckDBEvaluator(SQLEvaluator):
 
         Returns:
             Strings and datetimes enclosed in single quotes, or other literal
-            values rendered as SQL tokens. Embedded string quotes are doubled
-            for SQL.
+            values rendered as SQL tokens. List elements are evaluated
+            individually. Embedded string quotes are doubled for SQL.
         """
         if isinstance(node, str):
             escaped = node.replace("'", "''")
             return f"'{escaped}'"
         elif isinstance(node, datetime.datetime):
             return f"'{node}'"
+        elif isinstance(node, list):
+            return f"[{','.join(self.evaluate(value) for value in node)}]"
         else:
             return str(node)
 
 
 def to_sql_where(
     root: ast.Node,
-    field_mapping: Dict[str, str],
-    function_map: Optional[Dict[str, str]] = None,
+    field_mapping: dict[str, str],
+    function_map: dict[str, str] | None = None,
 ) -> str:
     """Translate a parsed filter into a DuckDB SQL WHERE expression.
 
@@ -74,5 +150,13 @@ def to_sql_where(
 
     Returns:
         SQL predicate to place after the WHERE keyword.
+
+    Raises:
+        KeyError: If a property or function is not present in its mapping.
+        ValueError: If a function mapping or pattern setting is invalid.
+        TypeError: If evaluation does not produce a SQL expression.
     """
-    return DuckDBEvaluator(field_mapping, function_map or {}).evaluate(root)
+    result = DuckDBEvaluator(field_mapping, function_map or {}).evaluate(root)
+    if not isinstance(result, str):
+        raise TypeError("Filter evaluation must produce a SQL expression")
+    return result
