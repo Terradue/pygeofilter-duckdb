@@ -73,18 +73,19 @@ def test_parsed_string_filter_matches_only_exact_value(value: str) -> None:
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
-        (7, 7),
-        (1.25, 1.25),
-        (True, True),
+        (7, "7"),
+        (1.25, "1.25"),
+        (True, "True"),
+        (False, "False"),
         (
             datetime.datetime(2023, 2, 1, tzinfo=datetime.UTC),
             "'2023-02-01 00:00:00+00:00'",
         ),
     ],
 )
-def test_other_literal_types_keep_existing_rendering(
+def test_non_string_literals_render_as_sql_tokens(
     value: int | float | bool | datetime.datetime,
-    expected: int | float | bool | str,
+    expected: str,
 ) -> None:
     evaluator = DuckDBEvaluator({}, {})
     assert evaluator.evaluate(value) == expected

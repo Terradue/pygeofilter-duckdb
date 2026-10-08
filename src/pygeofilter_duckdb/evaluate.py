@@ -47,7 +47,8 @@ class DuckDBEvaluator(SQLEvaluator):
 
         Returns:
             Strings and datetimes enclosed in single quotes, or other literal
-            values unchanged. Embedded string quotes are doubled for SQL.
+            values rendered as SQL tokens. Embedded string quotes are doubled
+            for SQL.
         """
         if isinstance(node, str):
             escaped = node.replace("'", "''")
@@ -55,7 +56,7 @@ class DuckDBEvaluator(SQLEvaluator):
         elif isinstance(node, datetime.datetime):
             return f"'{node}'"
         else:
-            return node
+            return str(node)
 
 
 def to_sql_where(
