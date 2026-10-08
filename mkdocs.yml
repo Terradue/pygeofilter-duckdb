@@ -1,0 +1,28 @@
+site_name: pygeofilter-duckdb
+site_description: Translate OGC filters into DuckDB SQL for GeoParquet queries
+repo_url: https://github.com/Terradue/pygeofilter-duckdb
+repo_name: Terradue/pygeofilter-duckdb
+edit_uri: edit/main/docs/
+theme:
+  name: readthedocs
+plugins:
+  - search
+strict: true
+nav:
+  - Home: index.md
+  - Tutorials:
+      - Your first filter: tutorials/first-filter.md
+      - Your first spatial filter: tutorials/spatial-filter.md
+  - How-to guides:
+      - Query GeoParquet: how-to/query-geoparquet.md
+      - Run notebooks: how-to/run-notebooks.md
+      - Restrict client filters: how-to/restrict-client-filters.md
+      - Develop and build docs: how-to/develop.md
+  - Reference:
+      - API: reference/api.md
+      - Verified operators: reference/operators.md
+      - Compatibility: reference/compatibility.md
+  - Explanation:
+      - Filter pipeline: explanation/filter-pipeline.md
+      - SQL safety: explanation/sql-safety.md
+      - Geometry storage: explanation/geometry-storage.md

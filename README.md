@@ -1,5 +1,10 @@
 # pygeofilter-duckdb
 
+Documentation lives in [docs/](docs/index.md), organized into tutorials, how-to
+guides, reference, and explanation. Preview it with `hatch run docs:serve`, or
+validate the site with `hatch run docs:build`. Read the Docs configuration is
+provided in `.readthedocs.yaml`.
+
 This repo is an evolution of [https://github.com/DLR-terrabyte/pygeofilter-duckdb](https://github.com/DLR-terrabyte/pygeofilter-duckdb).
 
 We have changed the orginal implementation to:

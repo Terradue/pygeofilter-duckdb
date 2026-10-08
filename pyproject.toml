@@ -42,7 +42,7 @@ path = "src/pygeofilter_duckdb/__about__.py"
 packages = ["src/pygeofilter_duckdb"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/tests", "/example", "/README.md", "/LICENSE", "/pyproject.toml"]
+include = ["/src", "/tests", "/example", "/README.md", "/LICENSE", "/pyproject.toml", "/docs", "/mkdocs.yml", "/.readthedocs.yaml"]
 
 [tool.hatch.envs.dev]
 dependencies = ["ruff", "mypy", "bandit", "pytest", "types-shapely", "pyarrow-stubs"]
@@ -54,6 +54,14 @@ format-check = "ruff format --check src tests"
 lint-check = "ruff check src tests"
 typecheck = "mypy src tests"
 security = "bandit -r src"
+
+[tool.hatch.envs.docs]
+detached = true
+dependencies = ["mkdocs==1.6.1"]
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --strict"
+serve = "mkdocs serve --dev-addr 127.0.0.1:8089"
 
 [tool.hatch.envs.test]
 dependencies = ["pytest"]
