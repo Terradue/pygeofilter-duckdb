@@ -1,42 +1,49 @@
-# Develop and build documentation
+# Develop and preview documentation
 
-Install Hatch, then run the project's non-mutating quality gates:
+Run commands from a repository checkout. Install Hatch for package checks and
+MkDocs for the documentation site:
 
-```bash
-# Check formatting and lint rules without rewriting source files.
+```console
+python -m pip install hatch 'mkdocs<2'
+```
+
+## Run quality checks and tests
+
+```console
 hatch run dev:format-check
 hatch run dev:lint-check
-# Verify static types, scan production code, and run the test suite.
 hatch run dev:typecheck
 hatch run dev:security
 hatch run test:test
 ```
 
-Confirm test discovery with `hatch run test:pytest --collect-only -q`.
-Spatial tests install and load the DuckDB spatial extension and fail if it cannot
-be loaded. To share an existing extension cache, set
-`PYGEOFILTER_SPATIAL_EXTENSION_DIRECTORY` to its directory.
+The first four commands are non-mutating checks. `test:test` runs the offline
+suite across Python 3.10–3.14. Hatch may need network access to provision the
+environments and their dependencies.
 
-Build or preview this site from the repository root:
+`hatch run dev:quality` groups the four static checks. `hatch run dev:check` adds
+pytest in the development environment; it does not replace the full test matrix.
+For one interpreter, use `hatch run +py=3.12 test:test`. To apply formatting and
+lint fixes, use `hatch run dev:fix`.
 
-```bash
-# Generate site/ and fail on documentation warnings.
-hatch run docs:build
-# Preview locally at http://127.0.0.1:8089 with automatic rebuilds.
-hatch run docs:serve
+## Build and preview the site
+
+```console
+mkdocs build --strict
+mkdocs serve
 ```
 
-Alternatively, install `docs/requirements.txt` and run
-`mkdocs build --strict` or `mkdocs serve`. The generated site is in `site/` and
-is ignored by Git.
+Open the local address printed by `serve`. The configuration is `mkdocs.yaml`.
+The build validates documentation links and navigation and writes HTML to `site/`.
+It does not execute Python examples or notebooks.
 
-Keep documentation in the relevant Diátaxis section:
-tutorials teach through complete exercises, how-to guides solve tasks,
-reference specifies contracts, and explanation describes design choices.
+With Task and uv installed, `task build-docs` builds the site strictly and
+`task serve-docs` starts the preview using an isolated MkDocs dependency.
 
-The root `.readthedocs.yaml` configures Read the Docs to build `mkdocs.yml` with
-Python 3.11 and the pinned documentation requirements.
+## Maintain documentation
 
-To host the site, import
-the repository into a Read the Docs project and enable its repository integration.
-Adding this configuration alone does not create or publish a hosted project.
+Keep tutorials focused on a guided exercise, how-to guides on specific tasks,
+reference pages on exact behavior, and explanation pages on design context.
+Check examples against the implementation and add new pages to `nav` in
+`mkdocs.yaml`. Use relative links between documentation pages and run a strict
+build before submitting changes.

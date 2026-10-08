@@ -1,15 +1,15 @@
 # pygeofilter-duckdb
 
-Documentation lives in [docs/](docs/index.md), organized into tutorials, how-to
-guides, reference, and explanation. Preview it with `hatch run docs:serve`, or
-validate the site with `hatch run docs:build`. Read the Docs configuration is
-provided in `.readthedocs.yaml`.
+[![PyPI - Version](https://img.shields.io/pypi/v/pygeofilter-duckdb.svg)](https://pypi.org/project/pygeofilter-duckdb)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pygeofilter-duckdb.svg)](https://pypi.org/project/pygeofilter-duckdb)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/terradue/pygeofilter-duckdb/package.yaml?branch=develop&event=push&label=build&logo=githubactions)](https://github.com/terradue/pygeofilter-duckdb/actions/workflows/package.yaml?query=branch%3Adevelop)
+[![Code coverage](https://img.shields.io/codecov/c/github/terradue/pygeofilter-duckdb/develop?logo=codecov)](https://app.codecov.io/gh/terradue/pygeofilter-duckdb/tree/develop)
 
 This repo is an evolution of [https://github.com/DLR-terrabyte/pygeofilter-duckdb](https://github.com/DLR-terrabyte/pygeofilter-duckdb).
 
 We have changed the orginal implementation to:
 - make it a standalone library
-- updated it to support newer DuckDB releases
+- use DuckDB below 1.2 on Python 3.10–3.13 and DuckDB 1.4.2–1.4.x on Python 3.14
 - added more examples to cover the process STAC Items -> geoparquet -> Duckdb
 - use hatch
 
@@ -177,30 +177,6 @@ This results in the following output
 ((("eo:cloud_cover" BETWEEN 0 AND 21) AND ("datetime" BETWEEN '2023-02-01T00:00:00Z' AND '2023-02-28T23:59:59Z')) AND ST_Intersects("geometry",ST_GeomFromHEXEWKB('0103000000010000000500000034DFB1B6AA0B1E4085B0648F53C44740509E1658D0FB244085B0648F53C44740509E1658D0FB244006A017C64BE5484034DFB1B6AA0B1E4006A017C64BE5484034DFB1B6AA0B1E4085B0648F53C44740')))
 ```
 
-## Parameterized filters
+## License
 
-Use `to_sql_where_params()` to keep filter values separate from SQL. It returns
-the predicate and an ordered list to pass as DuckDB execute parameters. For
-example, given a connection with an `items` table:
-
-```python
-from pygeofilter import ast
-from pygeofilter.parsers.cql2_json import parse
-from pygeofilter_duckdb import to_sql_where_params
-
-root = parse({"op": "=", "args": [{"property": "name"}, "O'Brien"]})
-assert isinstance(root, ast.Node)
-predicate, parameters = to_sql_where_params(root, {"name": "name"})
-# predicate: ("name" = ?)
-# parameters: ["O'Brien"]
-rows = connection.execute(
-    "SELECT * FROM items WHERE " + predicate, parameters
-).fetchall()
-```
-
-Scalars, timestamps, array elements, LIKE patterns and escape characters, and
-geometry literals use positional bindings. Each call produces its own parameter
-list. Preserve that list's order and pass the values separately to DuckDB;
-formatting them back into the SQL string discards the binding protection.
-Identifiers and function names still require server-controlled mappings. The
-existing `to_sql_where()` continues to return a single SQL string.
+[![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-blue)](https://www.apache.org/licenses/LICENSE-2.0)

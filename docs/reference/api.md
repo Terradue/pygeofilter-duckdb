@@ -1,70 +1,47 @@
-# API reference
+# Python API reference
 
-Both helpers are exported from `pygeofilter_duckdb`. Parse the filter using
-pygeofilter before calling them; the root must be a `pygeofilter.ast.Node` that
-produces a SQL expression.
-
-## `to_sql_where_params`
+## `pygeofilter_duckdb.to_sql_where`
 
 ```python
-# Signature reference: returns a WHERE expression and ordered bound values.
-# This describes the API; it is not an executable function call.
-to_sql_where_params(
-    root: ast.Node,  # Parsed filter expression.
-    field_mapping: dict[str, str],  # Property names mapped to single columns.
-    function_map: dict[str, str] | None = None,  # Optional function allowlist.
-) -> tuple[str, list[SQLParameter]]
+from pygeofilter_duckdb import to_sql_where
 ```
 
-Returns a predicate containing positional `?` placeholders and its ordered
-values. Each call returns an independent parameter list. Execute with
-`connection.execute("SELECT ... WHERE " + predicate, parameters)`.
-Do not interpolate the values back into the SQL.
+Signature: `to_sql_where(root: ast.Node, field_mapping: dict[str, str], function_map: dict[str, str] | None = None) -> str`.
 
-`SQLParameter` comprises `str`, `int`, `float`, `bool`, `datetime.datetime`,
-`datetime.date`, `datetime.time`, and `datetime.timedelta`. Lists are rendered
-as SQL arrays whose elements are bound individually.
-
-Geometry, envelope, and
-bounding-box values use bound hexadecimal WKB passed to `ST_GeomFromHEXEWKB`.
-
-## `to_sql_where`
-
-```python
-# Signature reference: returns a WHERE expression with rendered literals.
-# This describes the API; it is not an executable function call.
-to_sql_where(
-    root: ast.Node,  # Parsed filter expression.
-    field_mapping: dict[str, str],  # Property names mapped to single columns.
-    function_map: dict[str, str] | None = None,  # Optional function allowlist.
-) -> str
-```
-
-Returns a SQL predicate without the `WHERE` keyword. Strings escape embedded
-apostrophes by doubling them. Values are rendered into SQL rather than returned
-separately. The existing string-returning contract remains available.
-
-## Mapping and errors
-
-| Argument or failure | Contract |
+| Parameter | Meaning |
 | --- | --- |
-| `field_mapping` | Application-controlled property names mapped to single database identifiers |
-| `function_map` | Application-controlled allowlist; omitted means no mapped functions |
-| Unknown property or function | `KeyError` |
-| Invalid mapped function or pattern configuration | `ValueError` |
-| Evaluation does not return SQL | `TypeError` |
-| Unsupported bound literal | `TypeError` in the parameterized helper |
+| `root` | Parsed pygeofilter AST node. Parse CQL2 separately. |
+| `field_mapping` | Required dictionary mapping property names to SQL column names. |
+| `function_map` | Optional dictionary mapping function names to SQL function names; defaults to an empty mapping. |
 
-Neither helper connects to DuckDB, loads extensions, decodes property columns,
-or catches parser and database exceptions.
+Returns a SQL expression without the `WHERE` keyword. It does not open a
+connection or execute SQL.
 
-## `DuckDBEvaluator`
+| Failure | Cause |
+| --- | --- |
+| `KeyError` | A referenced property or function has no mapping. |
+| `NotImplementedError` | The AST contains a node without an evaluator handler. |
+| `TypeError` | Evaluation returns something other than a SQL expression string, or an inherited handler receives an incompatible literal. |
 
-Import from `pygeofilter_duckdb.evaluate`. It extends pygeofilter's
-`SQLEvaluator` using decorated handlers. Its inherited constructor takes
-`attribute_map`, optional `function_map`, and `use_ilike=False`.
-Call `evaluate(root)` to obtain the SQL expression.
+Parser errors occur before this function is called. Shapely errors can propagate
+when a supplied geometry cannot be converted.
 
-To request `ILIKE` for a case-insensitive `ast.Like` node, construct the evaluator
-with `use_ilike=True`; the convenience helpers use the constructor default.
-Do not assume that every parser option is exposed by the helpers.
+`parse` from `pygeofilter.parsers.cql2_json` returns a union of AST nodes and
+literal values. Narrow it with `isinstance(root, ast.Node)` for strict typing.
+The [tutorial](../tutorials/first-filter.md) demonstrates this.
+
+## `pygeofilter_duckdb.evaluate.DuckDBEvaluator`
+
+A subclass of pygeofilter 0.4.0's `SQLEvaluator`. Its inherited constructor accepts
+`attribute_map`, `function_map`, and `use_ilike=False`. Prefer `to_sql_where` for
+ordinary translation; the wrapper also checks the final result type.
+
+| Handler | Behavior |
+| --- | --- |
+| `geometry(node: values.Geometry) -> str` | Converts GeoJSON geometry to hexadecimal WKB with Shapely and emits `ST_GeomFromHEXEWKB(...)`. |
+| `envelope(node: values.Envelope) -> str` | Builds a rectangular polygon and emits the same constructor. |
+| `literal(node: Literal) -> Literal` | Quotes strings and datetime values; preserves other literal values. |
+
+`Literal` covers lists, strings, numbers, booleans, dates, times, and timedeltas.
+Logical, comparison, arithmetic, property, and function handlers are inherited.
+See the [operator reference](operators.md) for limitations.
