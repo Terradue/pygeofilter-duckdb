@@ -45,7 +45,7 @@ packages = ["src/pygeofilter_duckdb"]
 include = ["/src", "/tests", "/example", "/README.md", "/LICENSE", "/pyproject.toml"]
 
 [tool.hatch.envs.dev]
-dependencies = ["ruff", "mypy", "bandit", "pytest", "types-shapely"]
+dependencies = ["ruff", "mypy", "bandit", "pytest", "types-shapely", "pyarrow-stubs"]
 
 [tool.hatch.envs.dev.scripts]
 quality = ["ruff format --check src tests", "ruff check src tests", "mypy src tests", "bandit -r src"]
