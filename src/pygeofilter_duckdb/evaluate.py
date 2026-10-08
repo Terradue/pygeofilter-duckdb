@@ -8,6 +8,18 @@ from pygeofilter import ast, values
 from pygeofilter.backends.evaluator import handle
 from pygeofilter.backends.sql.evaluate import SQLEvaluator
 
+SQLParameter = (
+    str
+    | int
+    | float
+    | bool
+    | datetime.datetime
+    | datetime.date
+    | datetime.time
+    | datetime.timedelta
+)
+
+
 class DuckDBEvaluator(SQLEvaluator):
     """Render filter expressions with DuckDB spatial geometry constructors."""
 
@@ -133,6 +145,77 @@ class DuckDBEvaluator(SQLEvaluator):
             return f"[{','.join(self.evaluate(value) for value in node)}]"
         else:
             return str(node)
+
+
+class _ParameterizedDuckDBEvaluator(DuckDBEvaluator):
+    """Collect bound values while retaining DuckDB filter rendering handlers."""
+
+    def __init__(
+        self, field_mapping: dict[str, str], function_map: dict[str, str]
+    ) -> None:
+        super().__init__(field_mapping, function_map)
+        self.parameters: list[SQLParameter] = []
+
+    @handle(*values.LITERALS)
+    def literal(self, node: ast.AstType) -> str:
+        """Render literal values as placeholders in parameter traversal order."""
+        if isinstance(node, list):
+            return f"[{','.join(self.evaluate(value) for value in node)}]"
+        if not isinstance(
+            node,
+            (str, int, float, bool, datetime.date, datetime.time, datetime.timedelta),
+        ):
+            raise TypeError("Unsupported bound literal type")
+        self.parameters.append(node)
+        return "?"
+
+    @handle(values.Geometry)
+    def geometry(self, node: values.Geometry) -> str:
+        """Construct a geometry using bound hexadecimal WKB."""
+        wkb_hex = shapely.geometry.shape(node).wkb_hex
+        return f"ST_GeomFromHEXEWKB({self.literal(wkb_hex)})"
+
+    @handle(values.Envelope)
+    def envelope(self, node: values.Envelope) -> str:
+        """Construct an envelope using bound hexadecimal WKB."""
+        wkb_hex = shapely.geometry.box(node.x1, node.y1, node.x2, node.y2).wkb_hex
+        return f"ST_GeomFromHEXEWKB({self.literal(wkb_hex)})"
+
+    @handle(ast.BBox)
+    def bbox(self, node: ast.BBox, lhs: str) -> str:
+        """Render a bounding-box predicate with a bound geometry literal."""
+        wkb_hex = shapely.geometry.box(
+            node.minx, node.miny, node.maxx, node.maxy
+        ).wkb_hex
+        return f"ST_Intersects({lhs},ST_GeomFromHEXEWKB({self.literal(wkb_hex)}))"
+
+
+def to_sql_where_params(
+    root: ast.Node,
+    field_mapping: dict[str, str],
+    function_map: dict[str, str] | None = None,
+) -> tuple[str, list[SQLParameter]]:
+    """Translate a filter into DuckDB SQL and separately bound literal values.
+
+    Args:
+        root: Root node of the parsed filter expression.
+        field_mapping: Server-controlled mapping of properties to database fields.
+        function_map: Optional server-controlled allowlist of SQL function names.
+
+    Returns:
+        SQL predicate containing positional placeholders and its ordered values.
+        Pass both to DuckDB execute; each call returns an independent value list.
+
+    Raises:
+        KeyError: If a property or function is absent from its mapping.
+        ValueError: If a mapped function or pattern setting is invalid.
+        TypeError: If a literal is unsupported or evaluation does not produce SQL.
+    """
+    evaluator = _ParameterizedDuckDBEvaluator(field_mapping, function_map or {})
+    result = evaluator.evaluate(root)
+    if not isinstance(result, str):
+        raise TypeError("Filter evaluation must produce a SQL expression")
+    return result, evaluator.parameters
 
 
 def to_sql_where(

@@ -4,6 +4,6 @@
 
 """Expose conversion of parsed OGC filters to DuckDB SQL predicates."""
 
-from pygeofilter_duckdb.evaluate import to_sql_where
+from pygeofilter_duckdb.evaluate import to_sql_where, to_sql_where_params
 
-__all__ = ["to_sql_where"]
+__all__ = ["to_sql_where", "to_sql_where_params"]

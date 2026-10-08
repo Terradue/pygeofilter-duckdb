@@ -8,7 +8,7 @@ from pygeofilter import ast
 from pygeofilter.parsers.cql2_json import parse as parse_json
 from pygeofilter.parsers.cql2_text import parse
 
-from pygeofilter_duckdb import to_sql_where
+from pygeofilter_duckdb import to_sql_where, to_sql_where_params
 
 # The text parser is untyped; validate its result before SQL conversion.
 parse_text: Callable[[str], object] = parse
@@ -35,6 +35,7 @@ def connection() -> Iterator[duckdb.DuckDBPyConnection]:
         yield database
 
 
+@pytest.mark.parametrize("parameterized", [False, True])
 @pytest.mark.parametrize(
     ("expression", "expected"),
     [
@@ -76,37 +77,53 @@ def test_filter_result_ids(
     connection: duckdb.DuckDBPyConnection,
     expression: str,
     expected: list[int],
+    parameterized: bool,
 ) -> None:
     root = parse_text(expression)
     assert isinstance(root, ast.Node)
-    predicate = to_sql_where(
-        root, {name: name for name in ("score", "name", "active", "observed")}
-    )
+    fields = {name: name for name in ("score", "name", "active", "observed")}
+    if parameterized:
+        predicate, parameters = to_sql_where_params(root, fields)
+    else:
+        predicate, parameters = to_sql_where(root, fields), []
     rows = connection.execute(
-        "SELECT id FROM items WHERE " + predicate + " ORDER BY id"
+        "SELECT id FROM items WHERE " + predicate + " ORDER BY id", parameters
     ).fetchall()
     assert rows == [(identifier,) for identifier in expected]
 
 
+@pytest.mark.parametrize("parameterized", [False, True])
 @pytest.mark.parametrize(
     ("pattern", "expected"), [("al%", [1, 2]), ("bet_", [3]), ("missing%", [])]
 )
 def test_pattern_matching(
-    connection: duckdb.DuckDBPyConnection, pattern: str, expected: list[int]
+    connection: duckdb.DuckDBPyConnection,
+    pattern: str,
+    expected: list[int],
+    parameterized: bool,
 ) -> None:
     root = parse_json({"op": "like", "args": [{"property": "name"}, pattern]})
     assert isinstance(root, ast.Node)
-    predicate = to_sql_where(root, {"name": "name"})
+    if parameterized:
+        predicate, parameters = to_sql_where_params(root, {"name": "name"})
+    else:
+        predicate, parameters = to_sql_where(root, {"name": "name"}), []
     rows = connection.execute(
-        "SELECT id FROM items WHERE " + predicate + " ORDER BY id"
+        "SELECT id FROM items WHERE " + predicate + " ORDER BY id", parameters
     ).fetchall()
     assert rows == [(identifier,) for identifier in expected]
 
 
-def test_numeric_membership(connection: duckdb.DuckDBPyConnection) -> None:
+@pytest.mark.parametrize("parameterized", [False, True])
+def test_numeric_membership(
+    connection: duckdb.DuckDBPyConnection, parameterized: bool
+) -> None:
     root = parse_text("score IN (10, 20)")
     assert isinstance(root, ast.Node)
-    predicate = to_sql_where(root, {"score": "score"})
+    if parameterized:
+        predicate, parameters = to_sql_where_params(root, {"score": "score"})
+    else:
+        predicate, parameters = to_sql_where(root, {"score": "score"}), []
     assert connection.execute(
-        "SELECT id FROM items WHERE " + predicate + " ORDER BY id"
+        "SELECT id FROM items WHERE " + predicate + " ORDER BY id", parameters
     ).fetchall() == [(1,), (2,)]

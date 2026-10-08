@@ -77,7 +77,7 @@ versions cover the minimum, the previously excluded 1.2.0 boundary, and the
 modern target; they do not verify every intervening release. Publication waits
 for this matrix to pass.
 
-Local verification passed all 71 tests in each of the six supported
+Local verification passed all 152 tests in each of the six supported
 combinations. All four notebooks also executed successfully for each
 combination, reusing previously fetched STAC Items for notebook 02. The matrix
 used the matching spatial extension for each DuckDB version.
@@ -171,3 +171,31 @@ This results in the following output
 ```
 ((("eo:cloud_cover" BETWEEN 0 AND 21) AND ("datetime" BETWEEN '2023-02-01T00:00:00Z' AND '2023-02-28T23:59:59Z')) AND ST_Intersects("geometry",ST_GeomFromHEXEWKB('0103000000010000000500000034DFB1B6AA0B1E4085B0648F53C44740509E1658D0FB244085B0648F53C44740509E1658D0FB244006A017C64BE5484034DFB1B6AA0B1E4006A017C64BE5484034DFB1B6AA0B1E4085B0648F53C44740')))
 ```
+
+## Parameterized filters
+
+Use `to_sql_where_params()` to keep filter values separate from SQL. It returns
+the predicate and an ordered list to pass as DuckDB execute parameters. For
+example, given a connection with an `items` table:
+
+```python
+from pygeofilter import ast
+from pygeofilter.parsers.cql2_json import parse
+from pygeofilter_duckdb import to_sql_where_params
+
+root = parse({"op": "=", "args": [{"property": "name"}, "O'Brien"]})
+assert isinstance(root, ast.Node)
+predicate, parameters = to_sql_where_params(root, {"name": "name"})
+# predicate: ("name" = ?)
+# parameters: ["O'Brien"]
+rows = connection.execute(
+    "SELECT * FROM items WHERE " + predicate, parameters
+).fetchall()
+```
+
+Scalars, timestamps, array elements, LIKE patterns and escape characters, and
+geometry literals use positional bindings. Each call produces its own parameter
+list. Preserve that list's order and pass the values separately to DuckDB;
+formatting them back into the SQL string discards the binding protection.
+Identifiers and function names still require server-controlled mappings. The
+existing `to_sql_where()` continues to return a single SQL string.
