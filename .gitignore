@@ -1,6 +1,11 @@
 build/
+site/
 *.egg-info
 __pycache__
 .ipynb_checkpoints
 *.parquet
 *.jsonl
+.task
+uv.lock
+.venv
+.mypy_cache/

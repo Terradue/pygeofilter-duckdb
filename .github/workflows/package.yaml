@@ -12,65 +12,175 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: publish-to-pypi
+name: build-and-publish
 
 on:
   push:
     branches:
+    - feature
+    - feature/**
     - develop
     - main
-    paths:
-    - src/**
-    - .github/workflows/package.yaml
-    - README.md
   release:
-    types:
-    - published
+    types: [published]
   pull_request:
     branches:
+    - feature
+    - feature/**
     - develop
     - main
-    paths:
-    - src/**
 
 permissions:
+  id-token: write
   contents: read
   packages: write
 
 jobs:
 
-  deploy:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Match the Hatch Python test matrix.
+        python-version:
+        - '3.10'
+        - '3.11'
+        - '3.12'
+        - '3.13'
+        - '3.14'
+
+    steps:
+    - uses: actions/checkout@v7.0.1
+
+    - name: Set up Python
+      uses: actions/setup-python@v7.0.0
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: "pip"
+
+    - name: Install tooling
+      run: pip install hatch
+
+    # -----------------------------
+    # Strict SemVer + Hatch version gate
+    # -----------------------------
+    - name: Validate tag and hatch version
+      if: github.event_name == 'release'
+      env:
+        RELEASE_TAG: ${{ github.event.release.tag_name }}
+      run: |
+        TAG="$RELEASE_TAG"
+
+        # Ensure tag starts with v
+        if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "ERROR: Tag must follow strict SemVer format vX.Y.Z"
+          exit 1
+        fi
+
+        TAG_VERSION="${TAG#v}"
+        HATCH_VERSION=$(hatch version)
+
+        echo "Tag version:   $TAG_VERSION"
+        echo "Hatch version: $HATCH_VERSION"
+
+        if [ "$TAG_VERSION" != "$HATCH_VERSION" ]; then
+          echo "ERROR: Git tag version does not match hatch version"
+          exit 1
+        fi
+
+    - name: mypy (strict type checking)
+      run: hatch run dev:typecheck
+
+    - name: ruff (format)
+      run: hatch run dev:format-check
+
+    - name: ruff (check and McCabe complexity)
+      run: hatch run dev:lint-check
+
+    - name: bandit (find common security issues)
+      run: hatch run dev:security
+
+    - name: pytest (test coverage)
+      run: hatch run +py=${{ matrix.python-version }} test:test-cov
+
+    - name: Upload coverage to Codecov
+      if: github.event_name == 'push' && matrix.python-version == '3.12'
+      uses: codecov/codecov-action@v7
+      with:
+        use_oidc: true
+        files: ./coverage.xml
+        disable_search: true
+        fail_ci_if_error: false
+
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+        duckdb: ['1.1.3', '1.2.0', '1.5.6']
+        pygeofilter: ['0.4.0']
+    steps:
+    - uses: actions/checkout@v7.0.1
+    - uses: actions/setup-python@v7.0.0
+      with:
+        python-version: ${{ matrix.python }}
+        cache: pip
+    - name: Install compatibility dependencies
+      run: >-
+        python -m pip install -e . pytest
+        "duckdb==${{ matrix.duckdb }}"
+        "pygeofilter==${{ matrix.pygeofilter }}"
+    - name: Show dependency versions
+      run: >-
+        python -c "import sys, importlib.metadata as m;
+        print(sys.version);
+        print({p: m.version(p) for p in ('duckdb', 'pygeofilter', 'stac-geoparquet')})"
+    - name: Verify test discovery
+      run: python -m pytest --collect-only -q
+    - name: Run execution and spatial tests
+      run: python -m pytest -q
+
+  publish:
+    if: github.event_name == 'release' && github.event.action == 'published'
     runs-on: ubuntu-latest
     environment: release
+    needs: [build, compatibility]
     permissions:
-      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+      contents: read
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7.0.1
+
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7.0.0
       with:
-        python-version: '3.10'
+        python-version: '3.12'
         cache: pip
-    - name: Install dependencies
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Verify tag matches project version
+      env:
+        RELEASE_TAG: ${{ github.event.release.tag_name }}
       run: |
-        # python -m pip install --upgrade pip
-        # python -m pip install --upgrade pip
-        pip install hatch
+        TAG_VERSION="${RELEASE_TAG#v}"
+        PROJECT_VERSION="$(hatch version)"
+
+        echo "Tag version: ${TAG_VERSION}"
+        echo "Project version: ${PROJECT_VERSION}"
+
+        if [ "${TAG_VERSION}" != "${PROJECT_VERSION}" ]; then
+          echo "Tag ${RELEASE_TAG} does not match project version ${PROJECT_VERSION}"
+          exit 1
+        fi
+
     - name: Build package
-      run: "hatch build \n"
-    - name: Test package
       run: |
-        # hatch test
-        pip install nose2
-        pip install -e .
-        nose2
-    - name: Publish package distributions to PyPI (main)
-      if: github.ref == 'refs/heads/main'
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://upload.pypi.org/legacy/
-    - name: Publish package distributions to PyPI (develop)
-      if: github.ref != 'refs/heads/main'
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
+        rm -rf dist
+        hatch build
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.14.2
