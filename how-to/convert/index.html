@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://terradue.github.io/pygeofilter-duckdb/how-to/convert/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Configure translation - pygeofilter-duckdb</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Configure translation";
+        var mkdocs_page_input_path = "how-to/convert.md";
+        var mkdocs_page_url = "/pygeofilter-duckdb/how-to/convert/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../imgs/icon-eoap.png" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/first-filter/">Translate your first filter</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/spatial-filter/">Your first spatial filter</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../search/">Query GeoParquet</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../query-geoparquet/">Query GeoParquet and raw WKB</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../run-notebooks/">Run notebooks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../restrict-client-filters/">Restrict client filters</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Configure translation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#map-properties-to-columns">Map properties to columns</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#map-function-names">Map function names</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#filter-timestamps">Filter timestamps</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">Develop and preview documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/api/">Python API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/operators/">Operators</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/compatibility/">Compatibility</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/packaging/">Package builds</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/architecture/">How translation works</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/filter-pipeline/">Filter pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/sql-safety/">SQL safety</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/geometry-storage/">Geometry storage</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">pygeofilter-duckdb</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">How-to guides</li>
+      <li class="breadcrumb-item active">Configure translation</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/pygeofilter-duckdb/edit/main/docs/how-to/convert.md">Edit on Terradue/pygeofilter-duckdb</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="configure-filter-translation">Configure filter translation<a class="headerlink" href="#configure-filter-translation" title="Permanent link">&para;</a></h1>
+<p>Use explicit dictionaries to map CQL2 properties and functions to SQL names.
+These examples translate trusted filters; they do not execute queries.</p>
+<h2 id="map-properties-to-columns">Map properties to columns<a class="headerlink" href="#map-properties-to-columns" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">from pygeofilter import ast
+from pygeofilter.parsers.cql2_json import parse
+from pygeofilter_duckdb import to_sql_where
+
+query = {&quot;op&quot;: &quot;&lt;=&quot;, &quot;args&quot;: [{&quot;property&quot;: &quot;eo:cloud_cover&quot;}, 20]}
+root = parse(query)
+assert isinstance(root, ast.Node)
+where = to_sql_where(root, {&quot;eo:cloud_cover&quot;: &quot;cloud_cover&quot;})
+assert where == '(&quot;cloud_cover&quot; &lt;= 20)'
+</code></pre>
+<p>Every referenced property needs a mapping. Use the same name on both sides when
+properties already match column names. Unknown properties raise <code>KeyError</code>.
+Mapping values are quoted as single identifiers: <code>table.column</code> is not expanded
+into a qualified name, and SQL expressions do not belong in the mapping.</p>
+<h2 id="map-function-names">Map function names<a class="headerlink" href="#map-function-names" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">from pygeofilter import ast
+from pygeofilter.parsers.cql2_json import parse
+from pygeofilter_duckdb import to_sql_where
+
+query = {
+    &quot;op&quot;: &quot;=&quot;,
+    &quot;args&quot;: [{&quot;function&quot;: {&quot;name&quot;: &quot;lower&quot;, &quot;arguments&quot;: [{&quot;property&quot;: &quot;id&quot;}]}}, &quot;scene-a&quot;],
+}
+root = parse(query)
+assert isinstance(root, ast.Node)
+where = to_sql_where(root, {&quot;id&quot;: &quot;id&quot;}, {&quot;lower&quot;: &quot;lower&quot;})
+assert where == '(lower(&quot;id&quot;) = \'scene-a\')'
+</code></pre>
+<p><code>function_map</code> defaults to an empty dictionary. Missing function names raise
+<code>KeyError</code>; the evaluator does not verify that the function exists in DuckDB.
+Keep function mappings under application control.</p>
+<h2 id="filter-timestamps">Filter timestamps<a class="headerlink" href="#filter-timestamps" title="Permanent link">&para;</a></h2>
+<p>Use inclusive <code>between</code> bounds with ISO timestamp strings:</p>
+<pre><code class="language-python">query = {
+    &quot;op&quot;: &quot;between&quot;,
+    &quot;args&quot;: [{&quot;property&quot;: &quot;datetime&quot;}, [&quot;2023-02-01T00:00:00Z&quot;, &quot;2023-02-28T23:59:59Z&quot;]],
+}
+</code></pre>
+<p>Strings and Python <code>datetime.datetime</code> values are quoted; parsing or casting them
+during execution is DuckDB's responsibility. The evaluator does not implement
+dedicated temporal predicates such as <code>t_before</code>. See the
+<a href="../../reference/operators/">operator reference</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../restrict-client-filters/" class="btn btn-neutral float-left" title="Restrict client filters"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../develop/" class="btn btn-neutral float-right" title="Develop and preview documentation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Licensed under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/pygeofilter-duckdb" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/pygeofilter-duckdb</a>
+        </span>
+    
+    
+      <span><a href="../restrict-client-filters/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../develop/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

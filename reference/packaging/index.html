@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://terradue.github.io/pygeofilter-duckdb/reference/packaging/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Package builds - pygeofilter-duckdb</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Package builds";
+        var mkdocs_page_input_path = "reference/packaging.md";
+        var mkdocs_page_url = "/pygeofilter-duckdb/reference/packaging/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../imgs/icon-eoap.png" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/first-filter/">Translate your first filter</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/spatial-filter/">Your first spatial filter</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/search/">Query GeoParquet</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/query-geoparquet/">Query GeoParquet and raw WKB</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/run-notebooks/">Run notebooks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/restrict-client-filters/">Restrict client filters</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/convert/">Configure translation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/develop/">Develop and preview documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../api/">Python API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../operators/">Operators</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compatibility/">Compatibility</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Package builds</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#build-locally">Build locally</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#continuous-integration-and-releases">Continuous integration and releases</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/architecture/">How translation works</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/filter-pipeline/">Filter pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/sql-safety/">SQL safety</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/geometry-storage/">Geometry storage</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">pygeofilter-duckdb</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Reference</li>
+      <li class="breadcrumb-item active">Package builds</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/pygeofilter-duckdb/edit/main/docs/reference/packaging.md">Edit on Terradue/pygeofilter-duckdb</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="package-build-reference">Package build reference<a class="headerlink" href="#package-build-reference" title="Permanent link">&para;</a></h1>
+<p>The repository builds Python wheels and source distributions with Hatchling.
+It does not currently contain a Dockerfile or a container publishing workflow.</p>
+<h2 id="build-locally">Build locally<a class="headerlink" href="#build-locally" title="Permanent link">&para;</a></h2>
+<p>From a checkout with Hatch installed:</p>
+<pre><code class="language-console">hatch build
+</code></pre>
+<p>Artifacts are written to <code>dist/</code>. The version is read from
+<code>src/pygeofilter_duckdb/__about__.py</code>. The wheel contains the
+<code>pygeofilter_duckdb</code> package; the source distribution also includes documentation,
+tests, and license files as configured in <code>pyproject.toml</code>.</p>
+<h2 id="continuous-integration-and-releases">Continuous integration and releases<a class="headerlink" href="#continuous-integration-and-releases" title="Permanent link">&para;</a></h2>
+<p><code>.github/workflows/package.yaml</code> runs formatting, lint, typing, security, and
+coverage checks on Python 3.10–3.14, plus the dependency combinations in the
+<a href="../compatibility/">compatibility matrix</a>. PyPI publication runs only when a GitHub
+release is published. Its strict <code>vX.Y.Z</code> tag must match <code>hatch version</code>, and both
+quality and compatibility jobs must pass before trusted publishing runs.</p>
+<p><code>.github/workflows/docs.yaml</code> handles the documentation site separately. Building
+the documentation locally does not publish either a package or a website.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../compatibility/" class="btn btn-neutral float-left" title="Compatibility"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../explanation/architecture/" class="btn btn-neutral float-right" title="How translation works">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Licensed under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/pygeofilter-duckdb" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/pygeofilter-duckdb</a>
+        </span>
+    
+    
+      <span><a href="../compatibility/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../explanation/architecture/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

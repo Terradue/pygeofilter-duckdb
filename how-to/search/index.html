@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://terradue.github.io/pygeofilter-duckdb/how-to/search/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Query GeoParquet - pygeofilter-duckdb</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Query GeoParquet";
+        var mkdocs_page_input_path = "how-to/search.md";
+        var mkdocs_page_url = "/pygeofilter-duckdb/how-to/search/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../imgs/icon-eoap.png" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/first-filter/">Translate your first filter</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/spatial-filter/">Your first spatial filter</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Query GeoParquet</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#query-ordinary-columns">Query ordinary columns</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#add-a-spatial-predicate">Add a spatial predicate</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../query-geoparquet/">Query GeoParquet and raw WKB</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../run-notebooks/">Run notebooks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../restrict-client-filters/">Restrict client filters</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../convert/">Configure translation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">Develop and preview documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/api/">Python API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/operators/">Operators</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/compatibility/">Compatibility</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/packaging/">Package builds</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/architecture/">How translation works</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/filter-pipeline/">Filter pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/sql-safety/">SQL safety</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/geometry-storage/">Geometry storage</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">pygeofilter-duckdb</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">How-to guides</li>
+      <li class="breadcrumb-item active">Query GeoParquet</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/pygeofilter-duckdb/edit/main/docs/how-to/search.md">Edit on Terradue/pygeofilter-duckdb</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="query-geoparquet">Query GeoParquet<a class="headerlink" href="#query-geoparquet" title="Permanent link">&para;</a></h1>
+<p>The application owns the DuckDB connection, file access, extension setup, and
+result handling. <code>to_sql_where</code> supplies the filter expression.</p>
+<h2 id="query-ordinary-columns">Query ordinary columns<a class="headerlink" href="#query-ordinary-columns" title="Permanent link">&para;</a></h2>
+<p>This example expects <code>items.parquet</code> with <code>id</code> and <code>eo:cloud_cover</code> columns:</p>
+<pre><code class="language-python">import duckdb
+from pygeofilter import ast
+from pygeofilter.parsers.cql2_json import parse
+from pygeofilter_duckdb import to_sql_where
+
+query = {&quot;op&quot;: &quot;between&quot;, &quot;args&quot;: [{&quot;property&quot;: &quot;eo:cloud_cover&quot;}, [0, 21]]}
+root = parse(query)
+assert isinstance(root, ast.Node)
+where = to_sql_where(root, {&quot;eo:cloud_cover&quot;: &quot;eo:cloud_cover&quot;})
+
+with duckdb.connect() as connection:
+    rows = connection.execute(
+        f&quot;SELECT id FROM read_parquet(?) WHERE {where}&quot;, [&quot;items.parquet&quot;]
+    ).fetchall()
+print(rows)
+</code></pre>
+<p>The file path is bound separately. The generated predicate itself is SQL text and
+is not parameterized. For client input, prefer <code>to_sql_where_params</code> and pass
+the returned values after the file-path parameter. See
+<a href="../../explanation/sql-safety/">SQL safety</a>.</p>
+<h2 id="add-a-spatial-predicate">Add a spatial predicate<a class="headerlink" href="#add-a-spatial-predicate" title="Permanent link">&para;</a></h2>
+<p>Spatial predicates require DuckDB's spatial extension. Install it once in an
+environment with network access, then load it on each connection:</p>
+<pre><code class="language-python">import duckdb
+
+with duckdb.connect() as connection:
+    connection.execute(&quot;INSTALL spatial&quot;)
+    connection.execute(&quot;LOAD spatial&quot;)
+</code></pre>
+<p>Use a CQL2 spatial filter such as:</p>
+<pre><code class="language-python">query = {
+    &quot;op&quot;: &quot;s_intersects&quot;,
+    &quot;args&quot;: [
+        {&quot;property&quot;: &quot;geometry&quot;},
+        {&quot;type&quot;: &quot;Point&quot;, &quot;coordinates&quot;: [12.5, 41.9]},
+    ],
+}
+</code></pre>
+<p>Parse and translate it with <code>{"geometry": "geometry"}</code>, and execute the query on
+a connection where <code>spatial</code> is loaded. Geometry literals become
+<code>ST_GeomFromHEXEWKB(...)</code> expressions. The geometry column must have a type accepted
+by that DuckDB version's spatial functions. If a file exposes WKB as a BLOB,
+convert it to a geometry in a view with <code>ST_GeomFromWKB(geometry)</code> and query the
+view. Field mappings name columns; they do not insert SQL expressions.</p>
+<p>The translator does not inspect GeoParquet metadata, normalize coordinate systems,
+or load extensions. Check the file's coordinate system and column types before
+running spatial queries. See <a href="../../explanation/architecture/">architecture</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../tutorials/spatial-filter/" class="btn btn-neutral float-left" title="Your first spatial filter"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../query-geoparquet/" class="btn btn-neutral float-right" title="Query GeoParquet and raw WKB">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Licensed under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/pygeofilter-duckdb" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/pygeofilter-duckdb</a>
+        </span>
+    
+    
+      <span><a href="../../tutorials/spatial-filter/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../query-geoparquet/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://terradue.github.io/pygeofilter-duckdb/how-to/restrict-client-filters/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Restrict client filters - pygeofilter-duckdb</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Restrict client filters";
+        var mkdocs_page_input_path = "how-to/restrict-client-filters.md";
+        var mkdocs_page_url = "/pygeofilter-duckdb/how-to/restrict-client-filters/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../imgs/icon-eoap.png" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/first-filter/">Translate your first filter</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/spatial-filter/">Your first spatial filter</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../search/">Query GeoParquet</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../query-geoparquet/">Query GeoParquet and raw WKB</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../run-notebooks/">Run notebooks</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Restrict client filters</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../convert/">Configure translation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">Develop and preview documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/api/">Python API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/operators/">Operators</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/compatibility/">Compatibility</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/packaging/">Package builds</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/architecture/">How translation works</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/filter-pipeline/">Filter pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/sql-safety/">SQL safety</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/geometry-storage/">Geometry storage</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">pygeofilter-duckdb</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">How-to guides</li>
+      <li class="breadcrumb-item active">Restrict client filters</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/pygeofilter-duckdb/edit/main/docs/how-to/restrict-client-filters.md">Edit on Terradue/pygeofilter-duckdb</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="restrict-client-properties-and-functions">Restrict client properties and functions<a class="headerlink" href="#restrict-client-properties-and-functions" title="Permanent link">&para;</a></h1>
+<p>Define queryable names and SQL function mappings in application code:</p>
+<pre><code class="language-python">&quot;&quot;&quot;Translate an allowlisted function and property without executing a query.&quot;&quot;&quot;
+
+from pygeofilter import ast
+from pygeofilter.parsers.cql2_json import parse
+from pygeofilter_duckdb import to_sql_where_params
+
+# These mappings belong to the application, not the incoming client request.
+# The exposed cloud_cover property maps to a column whose name contains a colon.
+fields = {&quot;name&quot;: &quot;name&quot;, &quot;cloud_cover&quot;: &quot;eo:cloud_cover&quot;}
+# Only the lower function is available to this filter.
+functions = {&quot;lower&quot;: &quot;lower&quot;}
+# Parse the condition lower(name) = 'alpha'. JSON function nodes use
+# &quot;arguments&quot; for their operands in the supported pygeofilter parser.
+root = parse({
+    &quot;op&quot;: &quot;=&quot;,
+    &quot;args&quot;: [{&quot;function&quot;: {&quot;name&quot;: &quot;lower&quot;, &quot;arguments&quot;: [{&quot;property&quot;: &quot;name&quot;}]}}, &quot;alpha&quot;],
+})
+assert isinstance(root, ast.Node)
+# Resolve names through the allowlists and bind &quot;alpha&quot; separately from SQL.
+# The result is (lower(&quot;name&quot;) = ?) with parameters [&quot;alpha&quot;].
+predicate, parameters = to_sql_where_params(root, fields, functions)
+</code></pre>
+<p>Keep both mappings under application control; clients supply filter expressions,
+while your application decides which columns and functions they can access.</p>
+<p>The mapping rules are:</p>
+<ul>
+<li><strong>Properties:</strong> each value identifies one column. Embedded double quotes are
+  escaped, and a value containing dots is treated as one column name.</li>
+<li><strong>Functions:</strong> each value must be a name such as <code>lower</code> or <code>main.lower</code>.
+  SQL fragments and quoted function names are rejected.</li>
+<li><strong>Derived columns:</strong> expose them through a view, then map the property to the
+  view's column. Field mappings cannot contain SQL expressions.</li>
+</ul>
+<p>Handle failures at the stage where they occur:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Failure to handle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parsing</td>
+<td>Invalid filter syntax reported by the parser</td>
+</tr>
+<tr>
+<td>Translation</td>
+<td><code>KeyError</code> for an unmapped property or function</td>
+</tr>
+<tr>
+<td>Translation</td>
+<td><code>ValueError</code> for an invalid function mapping or pattern setting</td>
+</tr>
+<tr>
+<td>Translation</td>
+<td><code>TypeError</code> for an unsupported bound literal or a root that does not produce SQL</td>
+</tr>
+<tr>
+<td>Execution</td>
+<td>DuckDB errors for missing columns, incompatible types, or unavailable functions</td>
+</tr>
+</tbody>
+</table>
+<p>If you expose this library through a gateway, define its supported operators,
+validation rules, and HTTP responses in the application. This repository does
+not contain a gateway or specify HTTP status codes.</p>
+<p>See <a href="../../explanation/sql-safety/">SQL safety</a> for the reasoning behind these rules.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../run-notebooks/" class="btn btn-neutral float-left" title="Run notebooks"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../convert/" class="btn btn-neutral float-right" title="Configure translation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Licensed under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/pygeofilter-duckdb" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/pygeofilter-duckdb</a>
+        </span>
+    
+    
+      <span><a href="../run-notebooks/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../convert/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

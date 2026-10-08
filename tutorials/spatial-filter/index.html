@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://terradue.github.io/pygeofilter-duckdb/tutorials/spatial-filter/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Your first spatial filter - pygeofilter-duckdb</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Your first spatial filter";
+        var mkdocs_page_input_path = "tutorials/spatial-filter.md";
+        var mkdocs_page_url = "/pygeofilter-duckdb/tutorials/spatial-filter/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../..">
+          <img src="../../imgs/icon-eoap.png" class="logo" alt="Logo"/>
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../first-filter/">Translate your first filter</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Your first spatial filter</a>
+    <ul class="current">
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/search/">Query GeoParquet</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/query-geoparquet/">Query GeoParquet and raw WKB</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/run-notebooks/">Run notebooks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/restrict-client-filters/">Restrict client filters</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/convert/">Configure translation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/develop/">Develop and preview documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/api/">Python API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/operators/">Operators</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/compatibility/">Compatibility</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../reference/packaging/">Package builds</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/architecture/">How translation works</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/filter-pipeline/">Filter pipeline</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/sql-safety/">SQL safety</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/geometry-storage/">Geometry storage</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">pygeofilter-duckdb</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorials</li>
+      <li class="breadcrumb-item active">Your first spatial filter</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/pygeofilter-duckdb/edit/main/docs/tutorials/spatial-filter.md">Edit on Terradue/pygeofilter-duckdb</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="your-first-spatial-filter">Your first spatial filter<a class="headerlink" href="#your-first-spatial-filter" title="Permanent link">&para;</a></h1>
+<p>This tutorial selects an intersecting point, excludes a disjoint point, and
+observes how a null geometry behaves. Complete the
+<a href="../first-filter/">first-filter setup</a> first. Installing DuckDB's spatial
+extension requires network access unless it is already cached.</p>
+<p>Save this as <code>spatial_filter.py</code> and run <code>python spatial_filter.py</code>:</p>
+<pre><code class="language-python">&quot;&quot;&quot;Filter native DuckDB geometries and reconstruct the result with Shapely.&quot;&quot;&quot;
+
+import duckdb
+from pygeofilter import ast
+from pygeofilter.parsers.cql2_json import parse
+from pygeofilter_duckdb import to_sql_where_params
+from shapely import from_wkb
+from shapely.geometry import Point
+
+# Parse a spatial predicate: the geometry property intersects point (0, 0).
+root = parse({
+    &quot;op&quot;: &quot;s_intersects&quot;,
+    &quot;args&quot;: [
+        {&quot;property&quot;: &quot;geometry&quot;},
+        {&quot;type&quot;: &quot;Point&quot;, &quot;coordinates&quot;: [0, 0]},
+    ],
+})
+assert isinstance(root, ast.Node)
+# Map the queryable property to a native GEOMETRY column. The translator
+# binds the filter geometry as hexadecimal WKB in a geometry constructor.
+predicate, parameters = to_sql_where_params(root, {&quot;geometry&quot;: &quot;geometry&quot;})
+
+with duckdb.connect(&quot;:memory:&quot;) as connection:
+    # Install the extension if needed, then load it into this connection.
+    connection.execute(&quot;INSTALL spatial&quot;)
+    connection.execute(&quot;LOAD spatial&quot;)
+    # Store an intersecting point, a disjoint point, and a null geometry.
+    connection.execute(&quot;CREATE TABLE items (id INTEGER, geometry GEOMETRY)&quot;)
+    connection.execute(
+        &quot;INSERT INTO items VALUES &quot;
+        &quot;(1, ST_Point(0, 0)), (2, ST_Point(5, 5)), (3, NULL)&quot;
+    )
+    # Apply the predicate and encode the selected geometry as WKB for Shapely.
+    # NULL predicates are excluded by WHERE, just like FALSE predicates.
+    rows = connection.execute(
+        &quot;SELECT id, ST_AsWKB(geometry) FROM items WHERE &quot; + predicate,
+        parameters,
+    ).fetchall()
+
+# Check the selected ID and confirm that WKB preserves the point coordinates.
+assert [row[0] for row in rows] == [1]
+assert from_wkb(bytes(rows[0][1])).equals(Point(0, 0))
+print([row[0] for row in rows])
+</code></pre>
+<p>The output is <code>[1]</code>. The query exports the matching native geometry as WKB and
+Shapely reconstructs the original point. Row 3's predicate evaluates to SQL NULL,
+so it does not appear in the result.</p>
+<p>For stored files, continue with <a href="../../how-to/query-geoparquet/">querying GeoParquet</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../first-filter/" class="btn btn-neutral float-left" title="Translate your first filter"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../how-to/search/" class="btn btn-neutral float-right" title="Query GeoParquet">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p>Licensed under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/pygeofilter-duckdb" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/pygeofilter-duckdb</a>
+        </span>
+    
+    
+      <span><a href="../first-filter/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../how-to/search/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
