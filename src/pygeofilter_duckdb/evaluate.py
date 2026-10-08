@@ -21,7 +21,8 @@ class DuckDBEvaluator(SQLEvaluator):
     @handle(*values.LITERALS)
     def literal(self, node):
         if isinstance(node, str):
-            return f"'{node}'"
+            escaped = node.replace("'", "''")
+            return f"'{escaped}'"
         elif isinstance(node, datetime.datetime):
             return f"'{node}'"
         else:
