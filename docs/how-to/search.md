@@ -26,7 +26,9 @@ print(rows)
 ```
 
 The file path is bound separately. The generated predicate itself is SQL text and
-must come from trusted input; it is not a parameterized filter.
+is not parameterized. For client input, prefer `to_sql_where_params` and pass
+the returned values after the file-path parameter. See
+[SQL safety](../explanation/sql-safety.md).
 
 ## Add a spatial predicate
 

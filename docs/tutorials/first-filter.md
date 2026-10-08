@@ -1,69 +1,75 @@
-# Translate your first filter
+# Your first filter
 
-Create a cloud-cover filter, translate it into SQL, and execute it against an
-in-memory DuckDB table. No catalogue or spatial extension is needed.
+In this tutorial you will create an in-memory table, parse a CQL2 JSON filter,
+and execute a query with separately bound values.
 
-## 1. Install the package
+This example introduces the DuckDB query workflow used for both attribute and
+spatial filters. Here you select rows by a string property; in the
+[spatial tutorial](spatial-filter.md), you use the same parser, SQL translator,
+and execution API to select rows by geometry intersection.
 
-```console
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install pygeofilter-duckdb
+From a checkout of this repository, create a Python 3.11 environment:
+
+```bash
+# Create and activate an isolated Python environment.
+python3.11 -m venv .venv
+. .venv/bin/activate
+# Install this checkout so the example uses its evaluator implementation.
+python -m pip install -e .
 ```
 
-On Windows, activate with `.venv\Scripts\activate` instead. From a repository
-checkout, use `python -m pip install -e .` to test the local version.
-
-## 2. Translate a filter
-
-Save this as `first_filter.py`:
+Save the following as `first_filter.py` and run `python first_filter.py`:
 
 ```python
+"""Translate a CQL2 attribute filter and execute it against DuckDB rows."""
+
+import duckdb
 from pygeofilter import ast
 from pygeofilter.parsers.cql2_json import parse
-from pygeofilter_duckdb import to_sql_where
+from pygeofilter_duckdb import to_sql_where_params
 
-query = {"op": "<=", "args": [{"property": "eo:cloud_cover"}, 20]}
-root = parse(query)
+# Pygeofilter parses the CQL2 JSON expression into an abstract syntax tree.
+# This expression means: the property named "name" equals the value "O'Brien".
+root = parse({"op": "=", "args": [{"property": "name"}, "O'Brien"]})
 assert isinstance(root, ast.Node)
-where = to_sql_where(root, {"eo:cloud_cover": "cloud_cover"})
-print(where)
-```
 
-Run `python first_filter.py`. The output is:
+# Pygeofilter-duckdb translates the tree into a DuckDB WHERE predicate.
+# The application maps the exposed property "name" to the database column
+# "name". The returned SQL contains a ? placeholder; its value stays separate.
+predicate, parameters = to_sql_where_params(root, {"name": "name"})
 
-```text
-("cloud_cover" <= 20)
-```
+# DuckDB stores and queries the example data in a temporary in-memory database.
+with duckdb.connect(":memory:") as connection:
+    connection.execute("CREATE TABLE items (id INTEGER, name VARCHAR)")
+    connection.executemany(
+        "INSERT INTO items VALUES (?, ?)",
+        [(1, "O'Brien"), (2, "alpha"), (3, "' OR TRUE --")],
+    )
+    # Append the generated predicate to an application-controlled query and
+    # pass the values separately so DuckDB treats them as data, including quotes.
+    rows = connection.execute(
+        "SELECT id FROM items WHERE " + predicate + " ORDER BY id",
+        parameters,
+    ).fetchall()
 
-The field mapping connects the CQL2 property to the database column. The parser
-can also return standalone values, so the assertion narrows its result to the
-AST node accepted by `to_sql_where`.
-
-## 3. Execute the predicate
-
-Append this to the same file:
-
-```python
-import duckdb
-
-with duckdb.connect() as connection:
-    connection.execute("CREATE TABLE items (id VARCHAR, cloud_cover DOUBLE)")
-    connection.executemany("INSERT INTO items VALUES (?, ?)", [("clear", 5), ("cloudy", 80)])
-    rows = connection.execute(f"SELECT id FROM items WHERE {where} ORDER BY id").fetchall()
+print(predicate)
+print(parameters)
 print(rows)
+# Only the row whose name equals the requested literal value should match.
+assert rows == [(1,)]
 ```
 
-The final line is:
+Expected output, in order: the generated SQL predicate, its separately bound
+value list, and the matching row IDs:
 
 ```text
-[('clear',)]
+("name" = ?)
+["O'Brien"]
+[(1,)]
 ```
 
-This example constructs its filter from trusted constants. The evaluator emits
-SQL text without bind parameters or string escaping; see the
-[operator limits](../reference/operators.md#literal-and-execution-limits) before
-accepting filter input from users.
+Change the filter value to `"' OR TRUE --"` and the final assertion to
+`assert rows == [(3,)]`. Running the script again selects that literal value.
 
-Continue with [querying GeoParquet](../how-to/search.md) or
-[configuring field mappings](../how-to/convert.md).
+Next, try [spatial filtering](spatial-filter.md), or look up the
+[API contract](../reference/api.md).

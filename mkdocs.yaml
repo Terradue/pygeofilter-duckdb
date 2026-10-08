@@ -18,6 +18,8 @@ site_url: https://terradue.github.io/pygeofilter-duckdb/
 site_author: Fabrice Brito, Simone Tripodi
 repo_url: https://github.com/Terradue/pygeofilter-duckdb
 repo_name: Terradue/pygeofilter-duckdb
+edit_uri: edit/main/docs/
+strict: true
 
 theme:
   logo: imgs/icon-eoap.png
@@ -37,15 +39,23 @@ nav:
   - Home: index.md
   - Tutorials:
       - Translate your first filter: tutorials/first-filter.md
+      - Your first spatial filter: tutorials/spatial-filter.md
   - How-to guides:
       - Query GeoParquet: how-to/search.md
+      - Query GeoParquet and raw WKB: how-to/query-geoparquet.md
+      - Run notebooks: how-to/run-notebooks.md
+      - Restrict client filters: how-to/restrict-client-filters.md
       - Configure translation: how-to/convert.md
       - Develop and preview documentation: how-to/develop.md
   - Reference:
       - Python API: reference/api.md
       - Operators: reference/operators.md
+      - Compatibility: reference/compatibility.md
       - Package builds: reference/packaging.md
   - Explanation:
       - How translation works: explanation/architecture.md
+      - Filter pipeline: explanation/filter-pipeline.md
+      - SQL safety: explanation/sql-safety.md
+      - Geometry storage: explanation/geometry-storage.md
 
 copyright: Licensed under the Apache License, Version 2.0.

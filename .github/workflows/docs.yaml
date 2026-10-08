@@ -14,7 +14,7 @@
 
 name: docs
 permissions:
-  contents: write
+  contents: read
 
 on:
   push:
@@ -28,9 +28,21 @@ on:
     - docs/**
     - mkdocs.yaml
     - .github/**
+    - .readthedocs.yaml
+    - pyproject.toml
+
+  pull_request:
+    branches: [develop, main, master]
+    paths:
+    - README.md
+    - docs/**
+    - mkdocs.yaml
+    - .readthedocs.yaml
+    - .github/workflows/docs.yaml
+    - pyproject.toml
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -39,6 +51,19 @@ jobs:
       uses: actions/setup-python@v7.0.0
       with:
         python-version: 3.x
-    - run: pip install "mkdocs<2"
+    - run: pip install -r docs/requirements.txt
     - run: mkdocs build --strict
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7.0.1
+    - uses: actions/setup-python@v7.0.0
+      with:
+        python-version: '3.12'
+    - run: pip install -r docs/requirements.txt
     - run: mkdocs gh-deploy --strict --force

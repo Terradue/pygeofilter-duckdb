@@ -17,9 +17,10 @@ hatch run dev:security
 hatch run test:test
 ```
 
-The first four commands are non-mutating checks. `test:test` runs the offline
+The first four commands are non-mutating checks. `test:test` runs the execution and spatial
 suite across Python 3.10–3.14. Hatch may need network access to provision the
-environments and their dependencies.
+environments, dependencies, and DuckDB spatial extensions. Spatial fixtures also
+validate STAC items against schemas that may require network access.
 
 `hatch run dev:quality` groups the four static checks. `hatch run dev:check` adds
 pytest in the development environment; it does not replace the full test matrix.
@@ -27,6 +28,10 @@ For one interpreter, use `hatch run +py=3.12 test:test`. To apply formatting and
 lint fixes, use `hatch run dev:fix`.
 
 ## Build and preview the site
+
+The restored Hatch documentation environment provides `hatch run docs:build`
+and `hatch run docs:serve` (preview on `127.0.0.1:8089`). It pins the same MkDocs
+version as `docs/requirements.txt` used by CI and Read the Docs.
 
 ```console
 mkdocs build --strict

@@ -1,62 +1,35 @@
-# Operator reference
+# Verified operators
 
-The evaluator inherits SQL handlers from pygeofilter 0.4.0 and overrides geometry,
-envelope, and literal handling. This describes implemented AST handlers, not full
-CQL2 conformance. Accepted input syntax belongs to the chosen parser.
+Execution tests use in-memory DuckDB tables and assert result sets, including
+nulls and typed timestamps. The scalar execution cases run through both the
+literal and parameterized helpers.
 
-## Logical and comparison expressions
-
-| Expression | SQL form |
+| Behavior | Examples covered |
 | --- | --- |
-| AND / OR | `(left AND right)` / `(left OR right)` |
-| NOT | `NOT expression` |
 | Comparisons | `=`, `<>`, `<`, `<=`, `>`, `>=` |
-| Between | `column BETWEEN low AND high`, optionally `NOT BETWEEN` |
-| Like | `LIKE` with an `ESCAPE` clause |
-| Null test | `column IS NULL`, optionally `IS NOT NULL` |
-| Membership | `column IN (...)`, optionally `NOT IN` |
-| Arithmetic | Parenthesized `+`, `-`, `*`, `/` |
-| Function | `mapped_name(arguments)` |
+| Boolean combinations | `AND`, `OR`, `NOT`, grouped expressions |
+| Inclusive ranges | `BETWEEN`, `NOT BETWEEN` |
+| Membership | `IN`, `NOT IN`; strings, numbers, booleans |
+| Patterns | `LIKE`, negation, escape characters; `ILIKE` with evaluator configuration |
+| Null checks | `IS NULL`, `IS NOT NULL` |
+| Temporal values | Timestamp equality, ordering, ranges, timezone-equivalent instants |
+| Mapped functions | Allowlisted `lower` and qualified function names |
+| Arrays | Literal and bound element rendering and execution |
+| Spatial | Intersection; native geometry, decoded WKB, GeoParquet; bound geometry/envelope/bounding box |
 
-Properties are double-quoted column names looked up in the field mapping.
-Function names require an explicit function mapping.
+Pattern `%` and `_` remain wildcards. Binding a pattern prevents SQL syntax
+injection but does not turn a wildcard search into literal equality.
 
-## Spatial expressions
+SQL three-valued logic applies: comparisons against NULL usually produce NULL,
+and WHERE selects only TRUE. Negation does not turn an unknown comparison into
+TRUE.
 
-| Predicate | DuckDB function |
-| --- | --- |
-| Intersects | `ST_Intersects` |
-| Disjoint | `ST_Disjoint` |
-| Contains | `ST_Contains` |
-| Within | `ST_Within` |
-| Touches | `ST_Touches` |
-| Crosses | `ST_Crosses` |
-| Overlaps | `ST_Overlaps` |
-| Equals | `ST_Equals` |
+Use explicit null checks when null rows should be selected.
 
-Geometry and envelope literals use `ST_GeomFromHEXEWKB` with Shapely-generated
-hexadecimal WKB. The inherited BBox handler creates a polygon with
-`ST_GeomFromText` and tests intersection. Executing spatial expressions requires
-the spatial extension and compatible geometry columns.
+This table records verified behavior rather than asserting complete CQL
+conformance. Other operator behavior can be inherited from pygeofilter's
+`SQLEvaluator`; establish execution tests before relying on additional operators
+in a gateway.
 
-## Temporal expressions
-
-Use comparisons and inclusive `between` bounds for timestamp columns. Python
-`datetime.datetime` values and strings are single-quoted without timezone
-normalization. Dedicated temporal predicates and interval nodes have no SQL
-handler and can raise `NotImplementedError`.
-
-## Literal and execution limits
-
-- Strings are enclosed in single quotes without escaping embedded quotes.
-  Generated SQL is unsuitable for executing arbitrary untrusted filter input.
-- Column identifiers are double-quoted without escaping embedded double quotes.
-  Keep property and function mappings under application control.
-- Numeric, boolean, list, date, time, and timedelta values are returned unchanged
-  by the literal handler. Surrounding handlers may format them into SQL, but
-  this does not guarantee valid SQL for every type.
-- Inherited membership and function handlers join string arguments. Numeric
-  literals in those positions can raise `TypeError` rather than producing SQL.
-- Translation does not check column types, function availability, coordinate
-  systems, or query results. The suite tests translation and result-type
-  validation, not exhaustive execution against DuckDB.
+Parser failures and HTTP responses are separate application
+contracts. See [restricting client filters](../how-to/restrict-client-filters.md).

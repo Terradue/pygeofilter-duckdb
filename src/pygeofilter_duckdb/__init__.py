@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pygeofilter_duckdb.evaluate import to_sql_where
+"""Expose conversion of parsed OGC filters to DuckDB SQL predicates."""
 
-__all__ = ["to_sql_where"]
+from pygeofilter_duckdb.evaluate import to_sql_where, to_sql_where_params
+
+__all__ = ["to_sql_where", "to_sql_where_params"]
