@@ -1,5 +1,10 @@
 # pygeofilter-duckdb
 
+[![PyPI - Version](https://img.shields.io/pypi/v/pygeofilter-duckdb.svg)](https://pypi.org/project/pygeofilter-duckdb)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pygeofilter-duckdb.svg)](https://pypi.org/project/pygeofilter-duckdb)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/terradue/pygeofilter-duckdb/package.yaml?branch=develop&event=push&label=build&logo=githubactions)](https://github.com/terradue/pygeofilter-duckdb/actions/workflows/package.yaml?query=branch%3Adevelop)
+[![Code coverage](https://img.shields.io/codecov/c/github/terradue/pygeofilter-duckdb/develop?logo=codecov)](https://app.codecov.io/gh/terradue/pygeofilter-duckdb/tree/develop)
+
 This repo is an evolution of [https://github.com/DLR-terrabyte/pygeofilter-duckdb](https://github.com/DLR-terrabyte/pygeofilter-duckdb).
 
 We have changed the orginal implementation to:
@@ -82,3 +87,7 @@ This results in the following output
 ```
 ((("eo:cloud_cover" BETWEEN 0 AND 21) AND ("datetime" BETWEEN '2023-02-01T00:00:00Z' AND '2023-02-28T23:59:59Z')) AND ST_Intersects("geometry",ST_GeomFromHEXEWKB('0103000000010000000500000034DFB1B6AA0B1E4085B0648F53C44740509E1658D0FB244085B0648F53C44740509E1658D0FB244006A017C64BE5484034DFB1B6AA0B1E4006A017C64BE5484034DFB1B6AA0B1E4085B0648F53C44740')))
 ```
+
+## License
+
+[![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache%20License%202.0-blue)](https://www.apache.org/licenses/LICENSE-2.0)

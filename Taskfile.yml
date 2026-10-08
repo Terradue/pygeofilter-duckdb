@@ -26,20 +26,11 @@ tasks:
 
   serve-docs:
     cmds:
-    - |
-      uv run \
-      --with mkdocs-material \
-      --with mkdocs-mermaid2-plugin \
-      --with jupytext \
-      --with ipykernel \
-      --with bash_kernel \
-      --with mkdocs-jupyter \
-      --with legacy-cgi \
-      --with pdocs \
-      --with mkdocs-build-plantuml-plugin \
-      --with folium \
-      --with numpy \
-      mkdocs serve
+    - uv tool run --from 'mkdocs<2' mkdocs serve
+
+  build-docs:
+    cmds:
+    - uv tool run --from 'mkdocs<2' mkdocs build --strict
 
   run-clt: 
     cmds:

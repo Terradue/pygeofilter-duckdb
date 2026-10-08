@@ -1,0 +1,51 @@
+# Copyright 2025 Terradue
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+site_name: pygeofilter-duckdb
+site_description: Translate CQL2 filters into DuckDB SQL predicates.
+site_url: https://terradue.github.io/pygeofilter-duckdb/
+site_author: Fabrice Brito, Simone Tripodi
+repo_url: https://github.com/Terradue/pygeofilter-duckdb
+repo_name: Terradue/pygeofilter-duckdb
+
+theme:
+  logo: imgs/icon-eoap.png
+  name: readthedocs
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - fenced_code
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Tutorials:
+      - Translate your first filter: tutorials/first-filter.md
+  - How-to guides:
+      - Query GeoParquet: how-to/search.md
+      - Configure translation: how-to/convert.md
+      - Develop and preview documentation: how-to/develop.md
+  - Reference:
+      - Python API: reference/api.md
+      - Operators: reference/operators.md
+      - Package builds: reference/packaging.md
+  - Explanation:
+      - How translation works: explanation/architecture.md
+
+copyright: Licensed under the Apache License, Version 2.0.
