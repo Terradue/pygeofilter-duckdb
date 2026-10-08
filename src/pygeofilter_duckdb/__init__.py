@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+"""Expose conversion of parsed OGC filters to DuckDB SQL predicates."""
+
 from pygeofilter_duckdb.evaluate import to_sql_where
 
 __all__ = ["to_sql_where"]
