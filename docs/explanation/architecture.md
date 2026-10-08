@@ -20,7 +20,7 @@ translation does not prove that a query will execute against a particular schema
 ## Reuse the SQL evaluator
 
 `DuckDBEvaluator` inherits logical, comparison, arithmetic, property, and function
-handlers from pygeofilter's `SQLEvaluator`. Only geometry, envelope, and literal
+handlers from pygeofilter's `SQLEvaluator`. Geometry, envelope, literal, identifier, function, and pattern
 handling are specialized. Field mappings connect filter names to database
 columns, and function mappings connect filter functions to SQL functions.
 
@@ -36,6 +36,8 @@ notebooks demonstrate workflows using other libraries for those responsibilities
 Geometry representation can vary with the file and DuckDB version; prepare
 compatible columns before applying spatial predicates.
 
-The translator emits SQL text rather than bound parameters. Consult the
-[literal limits](../reference/operators.md#literal-and-execution-limits) when
-deciding which input your application can safely translate and execute.
+The `to_sql_where_params` helper uses a specialized evaluator to collect literal
+values separately while rendering positional placeholders in SQL. Use it for
+client-supplied filters; consult [SQL safety](sql-safety.md) for application-level
+constraints. The `to_sql_where` helper retains the inline SQL interface and
+escapes strings and identifiers.

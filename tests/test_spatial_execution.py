@@ -54,8 +54,7 @@ def test_intersects_and_wkb_round_trip(
             "SELECT typeof(geometry) FROM stored_wkb LIMIT 1"
         ).fetchone() == ("BLOB",)
         spatial_connection.execute(
-            "CREATE VIEW items AS SELECT id, ST_GeomFromWKB(geometry) "
-            "AS geometry FROM stored_wkb"
+            "CREATE VIEW items AS SELECT id, ST_GeomFromWKB(geometry) AS geometry FROM stored_wkb"
         )
     else:
         spatial_connection.execute("CREATE VIEW items AS SELECT * FROM geometries")
@@ -101,7 +100,7 @@ def test_geoparquet_predicate_results_and_round_trip(
             id=str(index),
             geometry=mapping(geometry),
             bbox=list(geometry.bounds),
-            datetime=datetime.datetime(2023, 2, 1, tzinfo=datetime.UTC),
+            datetime=datetime.datetime(2023, 2, 1, tzinfo=datetime.timezone.utc),
             properties={},
         )
         for index, geometry in enumerate(geometries, start=1)
@@ -111,16 +110,14 @@ def test_geoparquet_predicate_results_and_round_trip(
             id="5",
             geometry=mapping(Point(9, 9)),
             bbox=[9, 9, 9, 9],
-            datetime=datetime.datetime(2023, 2, 1, tzinfo=datetime.UTC),
+            datetime=datetime.datetime(2023, 2, 1, tzinfo=datetime.timezone.utc),
             properties={},
         )
     )
     for item in items:
         item.add_asset(
             "data",
-            pystac.Asset(
-                href="https://example.com/data.tif", media_type=pystac.MediaType.GEOTIFF
-            ),
+            pystac.Asset(href="https://example.com/data.tif", media_type=pystac.MediaType.GEOTIFF),
         )
         item.validate()
     table = parse_stac_items_to_arrow(items).read_all()
@@ -150,8 +147,7 @@ def test_geoparquet_predicate_results_and_round_trip(
             "SELECT typeof(geometry) FROM raw_items LIMIT 1"
         ).fetchone() == ("BLOB",)
         spatial_connection.execute(
-            "CREATE VIEW items AS SELECT id, ST_GeomFromWKB(geometry) "
-            "AS geometry FROM raw_items"
+            "CREATE VIEW items AS SELECT id, ST_GeomFromWKB(geometry) AS geometry FROM raw_items"
         )
     else:
         spatial_connection.read_parquet(str(path)).create_view("items")

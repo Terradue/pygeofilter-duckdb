@@ -78,7 +78,7 @@ def test_parsed_string_filter_matches_only_exact_value(value: str) -> None:
         (True, "True"),
         (False, "False"),
         (
-            datetime.datetime(2023, 2, 1, tzinfo=datetime.UTC),
+            datetime.datetime(2023, 2, 1, tzinfo=datetime.timezone.utc),
             "'2023-02-01 00:00:00+00:00'",
         ),
     ],

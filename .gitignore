@@ -8,3 +8,4 @@ __pycache__
 .task
 uv.lock
 .venv
+.mypy_cache/

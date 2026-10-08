@@ -115,9 +115,7 @@ def test_pattern_matching(
 
 
 @pytest.mark.parametrize("parameterized", [False, True])
-def test_numeric_membership(
-    connection: duckdb.DuckDBPyConnection, parameterized: bool
-) -> None:
+def test_numeric_membership(connection: duckdb.DuckDBPyConnection, parameterized: bool) -> None:
     root = parse_text("score IN (10, 20)")
     assert isinstance(root, ast.Node)
     if parameterized:

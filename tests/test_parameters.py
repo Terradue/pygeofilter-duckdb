@@ -29,9 +29,9 @@ def test_bound_strings_are_data(value: str) -> None:
         connection.executemany(
             "INSERT INTO items VALUES (?, ?)", [(1, value), (2, "other"), (3, None)]
         )
-        assert connection.execute(
-            "SELECT id FROM items WHERE " + sql, parameters
-        ).fetchall() == [(1,)]
+        assert connection.execute("SELECT id FROM items WHERE " + sql, parameters).fetchall() == [
+            (1,)
+        ]
 
 
 def test_nested_filter_parameter_order() -> None:
@@ -57,9 +57,7 @@ def test_nested_filter_parameter_order() -> None:
         }
     )
     assert isinstance(root, ast.Node)
-    sql, parameters = to_sql_where_params(
-        root, {"score": "score"}, {"normalize": "lower"}
-    )
+    sql, parameters = to_sql_where_params(root, {"score": "score"}, {"normalize": "lower"})
     assert parameters == ["O'BRIEN", "o'brien", 10, 20, 30, 40]
     with duckdb.connect() as connection:
         assert connection.execute(
@@ -81,9 +79,7 @@ def test_like_pattern_and_escape_are_bound(value: str) -> None:
 
 
 def test_array_parameters_and_independent_calls() -> None:
-    root = parse(
-        {"op": "=", "args": [{"property": "names"}, ["O'Brien", "' OR TRUE --"]]}
-    )
+    root = parse({"op": "=", "args": [{"property": "names"}, ["O'Brien", "' OR TRUE --"]]})
     assert isinstance(root, ast.Node)
     sql, parameters = to_sql_where_params(root, {"names": "names"})
     assert parameters == ["O'Brien", "' OR TRUE --"]
@@ -124,16 +120,14 @@ def test_unknown_property_and_function_rejected() -> None:
     with pytest.raises(KeyError):
         to_sql_where_params(ast.Function("missing", [1]), {})
     with pytest.raises(ValueError, match="Mapped functions"):
-        to_sql_where_params(
-            ast.Function("allowed", [1]), {}, {"allowed": "lower); SELECT 1 --"}
-        )
+        to_sql_where_params(ast.Function("allowed", [1]), {}, {"allowed": "lower); SELECT 1 --"})
 
 
 @pytest.mark.parametrize(
     "value",
     [
         datetime.date(2023, 2, 1),
-        datetime.datetime(2023, 2, 1, tzinfo=datetime.UTC),
+        datetime.datetime(2023, 2, 1, tzinfo=datetime.timezone.utc),
     ],
 )
 def test_temporal_values_keep_native_types(

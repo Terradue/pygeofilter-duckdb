@@ -23,12 +23,8 @@ def test_mapped_identifier_is_one_column(field: str) -> None:
     assert isinstance(root, ast.Node)
     predicate = to_sql_where(root, {"public": field})
     with duckdb.connect() as connection:
-        connection.register(
-            "items", pa.table({"id": [1, 2], field: ["match", "other"]})
-        )
-        assert connection.execute(
-            "SELECT id FROM items WHERE " + predicate
-        ).fetchall() == [(1,)]
+        connection.register("items", pa.table({"id": [1, 2], field: ["match", "other"]}))
+        assert connection.execute("SELECT id FROM items WHERE " + predicate).fetchall() == [(1,)]
 
 
 @pytest.mark.parametrize(
@@ -39,12 +35,8 @@ def test_quoted_like_patterns_match_only_data(pattern: str) -> None:
     assert isinstance(root, ast.Node)
     predicate = to_sql_where(root, {"name": "name"})
     with duckdb.connect() as connection:
-        connection.register(
-            "items", pa.table({"id": [1, 2, 3], "name": [pattern, "other", None]})
-        )
-        assert connection.execute(
-            "SELECT id FROM items WHERE " + predicate
-        ).fetchall() == [(1,)]
+        connection.register("items", pa.table({"id": [1, 2, 3], "name": [pattern, "other", None]}))
+        assert connection.execute("SELECT id FROM items WHERE " + predicate).fetchall() == [(1,)]
 
 
 @pytest.mark.parametrize(
@@ -55,18 +47,16 @@ def test_like_escape_character_execution(pattern: str, escape: str, value: str) 
     node = ast.Like(attribute("name"), pattern, False, "%", "_", escape, False)
     predicate = to_sql_where(node, {"name": "name"})
     with duckdb.connect() as connection:
-        assert connection.execute(
-            "SELECT ? AS name WHERE " + predicate, [value]
-        ).fetchall() == [(value,)]
+        assert connection.execute("SELECT ? AS name WHERE " + predicate, [value]).fetchall() == [
+            (value,)
+        ]
 
 
 @pytest.mark.parametrize(
     ("nocase", "negated", "expected"),
     [(False, False, []), (True, False, [(1,)]), (True, True, [(2,)])],
 )
-def test_like_case_and_negation(
-    nocase: bool, negated: bool, expected: list[tuple[int]]
-) -> None:
+def test_like_case_and_negation(nocase: bool, negated: bool, expected: list[tuple[int]]) -> None:
     node = ast.Like(attribute("name"), "O'B%", nocase, "%", "_", "\\", negated)
     evaluator = DuckDBEvaluator({"name": "name"}, {}, use_ilike=True)
     predicate = evaluator.evaluate(node)
@@ -74,10 +64,7 @@ def test_like_case_and_negation(
         connection.register(
             "items", pa.table({"id": [1, 2, 3], "name": ["o'brien", "other", None]})
         )
-        assert (
-            connection.execute("SELECT id FROM items WHERE " + predicate).fetchall()
-            == expected
-        )
+        assert connection.execute("SELECT id FROM items WHERE " + predicate).fetchall() == expected
 
 
 def test_allowlisted_function_escapes_arguments() -> None:
@@ -147,17 +134,11 @@ def test_multiple_escape_characters_rejected() -> None:
         to_sql_where(root, {"name": "name"})
 
 
-@pytest.mark.parametrize(
-    "value", ["O'Brien", "' OR TRUE --", "both '\" quotes", r"\' OR TRUE --"]
-)
+@pytest.mark.parametrize("value", ["O'Brien", "' OR TRUE --", "both '\" quotes", r"\' OR TRUE --"])
 def test_array_elements_escape_string_literals(value: str) -> None:
     root = parse({"op": "=", "args": [{"property": "names"}, [value]]})
     assert isinstance(root, ast.Node)
     predicate = to_sql_where(root, {"names": "names"})
     with duckdb.connect() as connection:
-        connection.register(
-            "items", pa.table({"id": [1, 2], "names": [[value], ["other"]]})
-        )
-        assert connection.execute(
-            "SELECT id FROM items WHERE " + predicate
-        ).fetchall() == [(1,)]
+        connection.register("items", pa.table({"id": [1, 2], "names": [[value], ["other"]]}))
+        assert connection.execute("SELECT id FROM items WHERE " + predicate).fetchall() == [(1,)]

@@ -19,9 +19,10 @@ tests, and license files as configured in `pyproject.toml`.
 ## Continuous integration and releases
 
 `.github/workflows/package.yaml` runs formatting, lint, typing, security, and
-coverage checks on Python 3.10–3.14. Releases use a strict `vX.Y.Z` tag whose
-version must match `hatch version`. After the build jobs pass, the release job
-builds distributions and publishes them to PyPI through trusted publishing.
+coverage checks on Python 3.10–3.14, plus the dependency combinations in the
+[compatibility matrix](compatibility.md). PyPI publication runs only when a GitHub
+release is published. Its strict `vX.Y.Z` tag must match `hatch version`, and both
+quality and compatibility jobs must pass before trusted publishing runs.
 
 `.github/workflows/docs.yaml` handles the documentation site separately. Building
 the documentation locally does not publish either a package or a website.

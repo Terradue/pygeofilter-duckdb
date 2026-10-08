@@ -4,6 +4,9 @@ Translate parsed CQL2 filters into SQL predicates for DuckDB. The package extend
 pygeofilter's SQL evaluator with DuckDB geometry constructors and timestamp literals.
 It returns the expression used after `WHERE`; your application executes the query.
 
+For client-supplied filters, prefer `to_sql_where_params` to keep literal values
+separate from SQL, with application-controlled property and function mappings.
+
 ## Start here
 
 | Goal | Guide |
@@ -22,17 +25,17 @@ It returns the expression used after `WHERE`; your application executes the quer
 python -m pip install pygeofilter-duckdb
 ```
 
-The project requires Python 3.10 or later and pins `pygeofilter==0.4.0`.
+The project requires Python 3.10 or later and requires `pygeofilter>=0.4.0,<0.5.0`.
 The configured test matrix covers Python 3.10–3.14.
 
 | Python | DuckDB dependency |
 | --- | --- |
-| 3.10–3.13 | `>=0.2.0,<1.2.0` |
-| 3.14 and later | `>=1.4.2,<1.5.0` |
+| 3.10–3.13 | `>=1.1.3,<1.6.0` |
+| 3.14 and later | `>=1.4.2,<1.6.0` |
 
 These constraints come from `pyproject.toml`. The Python 3.14 constraint avoids
-building the older DuckDB dependency from source. The tests check SQL translation;
-they do not establish compatibility with every DuckDB version in these ranges.
+building the older DuckDB dependency from source. The tests execute scalar and spatial queries across representative dependency
+versions; see [verified compatibility](reference/compatibility.md).
 
 The [example notebooks](https://github.com/Terradue/pygeofilter-duckdb/tree/develop/example)
 show STAC Items, GeoParquet creation, and DuckDB queries. They may need additional

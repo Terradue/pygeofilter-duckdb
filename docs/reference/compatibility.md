@@ -1,7 +1,8 @@
 # Dependencies and verified compatibility
 
-The project declares Python `>=3.11`, DuckDB `>=1.1.3,<1.6.0`, and pygeofilter
-`>=0.4.0,<0.5.0`. The CI compatibility matrix is:
+The project declares Python `>=3.10`, DuckDB `>=1.1.3,<1.6.0`, and pygeofilter
+`>=0.4.0,<0.5.0`. Python 3.14 and later require DuckDB `>=1.4.2,<1.6.0`
+to use compatible wheels. The CI compatibility matrix is:
 
 | Python | DuckDB | pygeofilter |
 | --- | --- | --- |
@@ -12,8 +13,8 @@ The project declares Python `>=3.11`, DuckDB `>=1.1.3,<1.6.0`, and pygeofilter
 These representative releases cover the oldest tested DuckDB baseline, the
 previously excluded 1.2 boundary, and the modern target reviewed on 2026-10-08.
 
-They do not prove compatibility with every intervening release or every newer
-Python version. Upper bounds reserve the next minor dependency releases for
+A separate Hatch matrix checks Python 3.10–3.14 with resolved dependencies.
+These checks do not prove compatibility with every intervening dependency release. Upper bounds reserve the next minor dependency releases for
 another review.
 
 Pygeofilter 0.2.4 failed four parser cases covering negated membership/ranges.
